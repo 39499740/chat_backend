@@ -1,0 +1,49 @@
+module.exports = {
+  preset: 'ts-jest',
+  testEnvironment: 'node',
+  roots: ['<rootDir>/src', '<rootDir>/test'],
+  testMatch: ['**/__tests__/**/*.ts', '**/?(*.)+(spec|test).ts'],
+  transform: {
+    '^.+\\.(t|j)s$': 'ts-jest',
+  },
+  collectCoverageFrom: [
+    'src/**/*.(t|j)s',
+    '!src/main.ts',
+    '!src/**/*.module.ts',
+    '!src/**/*.dto.ts',
+    '!src/**/*.interface.ts',
+    '!src/**/*.entity.ts',
+    '!src/**/*.interceptor.ts',
+    '!src/**/*.filter.ts',
+    '!src/**/*.pipe.ts',
+    '!src/**/*.guard.ts',
+  ],
+  coverageDirectory: '../coverage',
+  coverageReporters: ['text', 'lcov', 'html'],
+  coverageThreshold: {
+    global: {
+      branches: 80,
+      functions: 80,
+      lines: 80,
+      statements: 80,
+    },
+  },
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/src/$1',
+    '^@auth/(.*)$': '<rootDir>/src/modules/auth/$1',
+    '^@users/(.*)$': '<rootDir>/src/modules/users/$1',
+    '^@chat/(.*)$': '<rootDir>/src/modules/chat/$1',
+    '^@friends/(.*)$': '<rootDir>/src/modules/friends/$1',
+    '^@moments/(.*)$': '<rootDir>/src/modules/moments/$1',
+    '^@uploads/(.*)$': '<rootDir>/src/modules/uploads/$1',
+    '^@notifications/(.*)$': '<rootDir>/src/modules/notifications/$1',
+    '^@search/(.*)$': '<rootDir>/src/modules/search/$1',
+    '^@common/(.*)$': '<rootDir>/src/common/$1',
+    '^@config/(.*)$': '<rootDir>/src/config/$1',
+  },
+  globals: {
+    'ts-jest': {
+      tsconfig: 'tsconfig.json',
+    },
+  },
+};
