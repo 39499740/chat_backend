@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { DatabaseModule } from './common/database/database.module';
 import { DatabaseService } from './common/database/database.service';
 import { AuthModule } from './modules/auth/auth.module';
+import { UsersModule } from './modules/users/users.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
@@ -38,6 +39,7 @@ import {
     }),
     DatabaseModule,
     AuthModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [
