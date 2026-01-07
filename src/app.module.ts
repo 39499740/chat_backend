@@ -8,6 +8,7 @@ import { DatabaseService } from './common/database/database.service';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { UploadsModule } from './modules/uploads/uploads.module';
+import { FriendsModule } from './modules/friends/friends.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
@@ -42,6 +43,7 @@ import {
     AuthModule,
     UsersModule,
     UploadsModule,
+    FriendsModule,
   ],
   controllers: [AppController],
   providers: [
