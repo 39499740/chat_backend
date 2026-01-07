@@ -1,9 +1,11 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
+import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseModule } from './common/database/database.module';
+import { DatabaseService } from './common/database/database.service';
+import { AuthModule } from './modules/auth/auth.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
@@ -35,10 +37,12 @@ import {
       envFilePath: '.env',
     }),
     DatabaseModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
+    DatabaseService,
     {
       provide: APP_FILTER,
       useClass: AllExceptionsFilter,

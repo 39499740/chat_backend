@@ -44,3 +44,23 @@ export class PaginationDto {
   @ApiProperty({ example: 10 })
   totalPages: number;
 }
+
+export class UserDto {
+  @ApiProperty({ description: '用户ID' })
+  id: string;
+
+  @ApiProperty({ description: '用户名' })
+  username: string;
+
+  @ApiProperty({ description: '邮箱' })
+  email: string;
+
+  @ApiProperty({ description: '昵称', required: false })
+  nickname?: string;
+
+  @ApiProperty({ description: '头像URL', required: false })
+  avatar_url?: string;
+
+  @ApiProperty({ description: '创建时间' })
+  created_at: string;
+}
