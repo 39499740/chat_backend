@@ -4,6 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { DatabaseModule } from './common/database/database.module';
+import { RedisModule } from './common/redis/redis.module';
 import { DatabaseService } from './common/database/database.service';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
@@ -12,6 +13,7 @@ import { FriendsModule } from './modules/friends/friends.module';
 import { MomentsModule } from './modules/moments/moments.module';
 import { ConversationsModule } from './modules/conversations/conversations.module';
 import { WebSocketModule } from './modules/websocket/websocket.module';
+import { ChatModule } from './modules/chat/chat.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
@@ -43,6 +45,7 @@ import {
       envFilePath: '.env',
     }),
     DatabaseModule,
+    RedisModule,
     AuthModule,
     UsersModule,
     UploadsModule,
@@ -50,6 +53,7 @@ import {
     MomentsModule,
     ConversationsModule,
     WebSocketModule,
+    ChatModule,
   ],
   controllers: [AppController],
   providers: [

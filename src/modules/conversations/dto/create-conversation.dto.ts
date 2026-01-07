@@ -31,6 +31,6 @@ export class CreateConversationDto {
   @ApiProperty({ description: '初始成员ID列表（群聊时使用）', required: false })
   @IsOptional()
   @IsArray()
-  @IsUUID('each')
+  @IsUUID(4, { each: true })
   memberIds?: string[];
 }

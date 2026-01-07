@@ -487,6 +487,38 @@ CREATE INDEX IF NOT EXISTS idx_media_files_type ON media_files(media_type);
 CREATE INDEX IF NOT EXISTS idx_media_files_created ON media_files(created_at DESC);
 
 -- ========================================
+-- 通话记录表 (call_records)
+-- ========================================
+CREATE TABLE IF NOT EXISTS call_records (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    caller_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    callee_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    conversation_id UUID REFERENCES conversations(id) ON DELETE SET NULL,
+
+    -- 通话类型
+    call_type VARCHAR(10) NOT NULL, -- 'audio' 或 'video'
+
+    -- 通话状态
+    status VARCHAR(20) NOT NULL, -- 'calling', 'ringing', 'accepted', 'declined', 'ended', 'failed'
+
+    -- 时间信息
+    started_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    ended_at TIMESTAMP WITH TIME ZONE,
+    duration INTEGER, -- 通话时长（秒）
+
+    -- 额外信息
+    metadata JSONB, -- 存储额外的通话信息（如网络质量、设备信息等）
+
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- 索引：call_records 表
+CREATE INDEX IF NOT EXISTS idx_call_records_caller ON call_records(caller_id);
+CREATE INDEX IF NOT EXISTS idx_call_records_callee ON call_records(callee_id);
+CREATE INDEX IF NOT EXISTS idx_call_records_conversation ON call_records(conversation_id);
+CREATE INDEX IF NOT EXISTS idx_call_records_started ON call_records(started_at DESC);
+
+-- ========================================
 -- 初始化完成
 -- ========================================
 
