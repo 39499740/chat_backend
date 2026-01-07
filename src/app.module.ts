@@ -14,6 +14,8 @@ import { MomentsModule } from './modules/moments/moments.module';
 import { ConversationsModule } from './modules/conversations/conversations.module';
 import { WebSocketModule } from './modules/websocket/websocket.module';
 import { ChatModule } from './modules/chat/chat.module';
+import { NotificationsModule } from './modules/notifications/notifications.module';
+import { SearchModule } from './modules/search/search.module';
 import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
@@ -54,6 +56,8 @@ import {
     ConversationsModule,
     WebSocketModule,
     ChatModule,
+    NotificationsModule,
+    SearchModule,
   ],
   controllers: [AppController],
   providers: [

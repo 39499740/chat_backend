@@ -37,9 +37,12 @@ async function bootstrap() {
     .addTag('users', '用户相关接口')
     .addTag('friends', '好友相关接口')
     .addTag('chat', '聊天相关接口')
+    .addTag('conversations', '会话相关接口')
     .addTag('moments', '朋友圈相关接口')
     .addTag('uploads', '文件上传接口')
     .addTag('notifications', '通知相关接口')
+    .addTag('search', '搜索相关接口')
+    .addTag('webrtc', 'WebRTC通话相关接口')
     .addBearerAuth(
       {
         type: 'http',
