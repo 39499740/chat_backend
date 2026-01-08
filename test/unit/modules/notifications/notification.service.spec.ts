@@ -1,6 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotificationService } from '../../../../src/modules/notifications/services/notification.service';
 import { DatabaseService } from '../../../../src/common/database/database.service';
+import { RedisService } from '../../../../src/common/services/redis.service';
+import { ChatGateway } from '../../../../src/modules/websocket/chat.gateway';
+import { Inject } from '@nestjs/common';
 
 describe('NotificationService', () => {
   let service: NotificationService;
@@ -21,7 +24,10 @@ describe('NotificationService', () => {
     };
 
     mockChatGateway = {
-      sendNotificationToUser: jest.fn(),
+      server: {
+        to: jest.fn().mockReturnThis(),
+        emit: jest.fn(),
+      },
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -32,11 +38,11 @@ describe('NotificationService', () => {
           useValue: mockDb,
         },
         {
-          provide: 'RedisService',
+          provide: RedisService,
           useValue: mockRedisService,
         },
         {
-          provide: 'ChatGateway',
+          provide: ChatGateway,
           useValue: mockChatGateway,
         },
       ],
@@ -82,7 +88,7 @@ describe('NotificationService', () => {
       const userId = '1';
 
       mockDb.query.mockResolvedValueOnce({ rows: [] });
-      mockDb.query.mockResolvedValueOnce({ rows: [{ count: '0' }] });
+      mockDb.query.mockResolvedValueOnce({ rows: [{ total: '0' }] });
 
       const result = await service.getUserNotifications(userId, {
         page: 1,
