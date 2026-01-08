@@ -1,0 +1,224 @@
+# 性能测试配置
+# 用于测试微信社交应用后端系统的性能
+
+config:
+  target: 'http://localhost:3000'
+  phases:
+    # 阶段 1: 预热 (1分钟)
+    - duration: 60
+      arrivalRate: 10
+      name: '预热阶段'
+    # 阶段 2: 逐步增加 (2分钟)
+    - duration: 120
+      arrivalRate: 30
+      name: '逐步增加负载'
+    # 阶段 3: 稳定负载 (5分钟)
+    - duration: 300
+      arrivalRate: 50
+      name: '稳定负载'
+    # 阶段 4: 峰值负载 (2分钟)
+    - duration: 120
+      arrivalRate: 100
+      name: '峰值负载'
+    # 阶段 5: 恢复正常 (1分钟)
+    - duration: 60
+      arrivalRate: 20
+      name: '恢复阶段'
+
+  processor: './test/performance/pre-processor.js'
+  http:
+    timeout: 30
+    pool: 10
+
+scenarios:
+  # 场景 1: 完整的聊天流程
+  - name: '聊天流程'
+    flow:
+      # 用户注册
+      - post:
+          url: '/api/auth/register'
+          json:
+            username: 'perf-test-{{ $randomNumber(10000, 99999) }}'
+            email: 'perf-test-{{ $randomNumber(10000, 99999) }}@example.com'
+            password: 'password123'
+          capture:
+            - json: '$.accessToken'
+              as: 'token'
+            - json: '$.user.id'
+              as: 'userId'
+      # 获取用户信息
+      - get:
+          url: '/api/users/me'
+          headers:
+            Authorization: 'Bearer {{ token }}'
+      # 获取会话列表
+      - get:
+          url: '/api/conversations'
+          headers:
+            Authorization: 'Bearer {{ token }}'
+      # 搜索用户
+      - get:
+          url: '/api/search'
+          qs:
+            query: 'user'
+            type: 'users'
+          headers:
+            Authorization: 'Bearer {{ token }}'
+      # 登出
+      - post:
+          url: '/api/auth/logout'
+          headers:
+            Authorization: 'Bearer {{ token }}'
+
+  # 场景 2: API 接口压力测试
+  - name: 'API 压力测试'
+    weight: 30
+    flow:
+      # 登录
+      - post:
+          url: '/api/auth/login'
+          json:
+            username: 'testuser'
+            password: 'password123'
+          capture:
+            - json: '$.accessToken'
+              as: 'token'
+      # 获取用户信息 (多次请求)
+      - get:
+          url: '/api/users/me'
+          headers:
+            Authorization: 'Bearer {{ token }}'
+          think: 0.5
+      - get:
+          url: '/api/users/me'
+          headers:
+            Authorization: 'Bearer {{ token }}'
+          think: 0.5
+      - get:
+          url: '/api/users/me'
+          headers:
+            Authorization: 'Bearer {{ token }}'
+          think: 0.5
+      # 获取会话列表
+      - get:
+          url: '/api/conversations'
+          headers:
+            Authorization: 'Bearer {{ token }}'
+          think: 1
+
+  # 场景 3: 快速登录测试
+  - name: '快速登录测试'
+    weight: 20
+    flow:
+      - post:
+          url: '/api/auth/login'
+          json:
+            username: 'testuser'
+            password: 'password123'
+          think: 0.1
+      - post:
+          url: '/api/auth/login'
+          json:
+            username: 'testuser'
+            password: 'password123'
+          think: 0.1
+      - post:
+          url: '/api/auth/login'
+          json:
+            username: 'testuser'
+            password: 'password123'
+          think: 0.1
+
+  # 场景 4: 搜索功能测试
+  - name: '搜索功能测试'
+    weight: 15
+    flow:
+      - post:
+          url: '/api/auth/login'
+          json:
+            username: 'testuser'
+            password: 'password123'
+          capture:
+            - json: '$.accessToken'
+              as: 'token'
+      # 搜索用户
+      - get:
+          url: '/api/search'
+          qs:
+            query: 'test'
+            type: 'users'
+            page: 1
+            limit: 20
+          headers:
+            Authorization: 'Bearer {{ token }}'
+          think: 0.5
+      # 搜索帖子
+      - get:
+          url: '/api/search'
+          qs:
+            query: 'test'
+            type: 'posts'
+            page: 1
+            limit: 20
+          headers:
+            Authorization: 'Bearer {{ token }}'
+          think: 0.5
+      # 获取搜索建议
+      - get:
+          url: '/api/search/suggestions'
+          qs:
+            query: 'test'
+            type: 'users'
+          headers:
+            Authorization: 'Bearer {{ token }}'
+
+  # 场景 5: 通知功能测试
+  - name: '通知功能测试'
+    weight: 15
+    flow:
+      - post:
+          url: '/api/auth/login'
+          json:
+            username: 'testuser'
+            password: 'password123'
+          capture:
+            - json: '$.accessToken'
+              as: 'token'
+      # 获取通知列表
+      - get:
+          url: '/api/notifications'
+          qs:
+            page: 1
+            limit: 20
+          headers:
+            Authorization: 'Bearer {{ token }}'
+          think: 0.5
+      # 获取未读通知数
+      - get:
+          url: '/api/notifications/unread-count'
+          headers:
+            Authorization: 'Bearer {{ token }}'
+          think: 0.3
+
+  # 场景 6: 错误处理测试
+  - name: '错误处理测试'
+    weight: 10
+    flow:
+      # 无效登录
+      - post:
+          url: '/api/auth/login'
+          json:
+            username: 'invalid'
+            password: 'invalid'
+          expect: -1
+      # 未授权访问
+      - get:
+          url: '/api/users/me'
+          expect: -1
+      # 无效搜索查询
+      - get:
+          url: '/api/search'
+          qs:
+            query: 'x'
+            type: 'users'
+          expect: -1

@@ -88,10 +88,7 @@ export class AuthService {
     }
 
     // 更新最后登录时间
-    await this.db.query(
-      'UPDATE users SET last_login_at = NOW() WHERE id = $1',
-      [user.id],
-    );
+    await this.db.query('UPDATE users SET last_login_at = NOW() WHERE id = $1', [user.id]);
 
     const tokens = await this.generateTokens(user.id, user.username);
 
@@ -176,9 +173,8 @@ export class AuthService {
     // await this.redis.set(`blacklist:${token}`, '1', 'EX', expiration);
 
     // 更新用户状态为离线
-    await this.db.query(
-      'UPDATE user_sessions SET last_accessed_at = NOW() WHERE user_id = $1',
-      [userId],
-    );
+    await this.db.query('UPDATE user_sessions SET last_accessed_at = NOW() WHERE user_id = $1', [
+      userId,
+    ]);
   }
 }

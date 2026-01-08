@@ -238,7 +238,7 @@ export class OfflineMessageService {
   /**
    * 根据用户ID获取Socket ID
    */
-  private getSocketIdByUserId(userId: string): string | null {
+  private getSocketIdByUserId(_userId: string): string | null {
     // TODO: 实现从ChatGateway获取用户Socket ID的逻辑
     return null;
   }

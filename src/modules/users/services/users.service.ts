@@ -78,10 +78,7 @@ export class UsersService {
     const { currentPassword, newPassword } = passwords;
 
     // 获取用户当前密码
-    const result = await this.db.query(
-      'SELECT password_hash FROM users WHERE id = $1',
-      [userId],
-    );
+    const result = await this.db.query('SELECT password_hash FROM users WHERE id = $1', [userId]);
 
     if (result.rows.length === 0) {
       throw new NotFoundException('用户不存在');
@@ -90,10 +87,7 @@ export class UsersService {
     const user = result.rows[0];
 
     // 验证当前密码
-    const isPasswordValid = await bcrypt.compare(
-      currentPassword,
-      user.password_hash,
-    );
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.password_hash);
     if (!isPasswordValid) {
       throw new UnauthorizedException('当前密码不正确');
     }
@@ -102,10 +96,10 @@ export class UsersService {
     const newPasswordHash = await bcrypt.hash(newPassword, 10);
 
     // 更新密码
-    await this.db.query(
-      'UPDATE users SET password_hash = $1 WHERE id = $2',
-      [newPasswordHash, userId],
-    );
+    await this.db.query('UPDATE users SET password_hash = $1 WHERE id = $2', [
+      newPasswordHash,
+      userId,
+    ]);
 
     return { message: '密码修改成功' };
   }
@@ -125,17 +119,11 @@ export class UsersService {
   }
 
   async getUserSettings(userId: string) {
-    const result = await this.db.query(
-      `SELECT * FROM user_settings WHERE user_id = $1`,
-      [userId],
-    );
+    const result = await this.db.query(`SELECT * FROM user_settings WHERE user_id = $1`, [userId]);
 
     if (result.rows.length === 0) {
       // 如果用户设置不存在，创建默认设置
-      await this.db.query(
-        `INSERT INTO user_settings (user_id) VALUES ($1)`,
-        [userId],
-      );
+      await this.db.query(`INSERT INTO user_settings (user_id) VALUES ($1)`, [userId]);
       return await this.getUserSettings(userId);
     }
 

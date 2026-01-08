@@ -46,13 +46,7 @@ export class UploadsService {
       'Content-Type': file.mimetype,
     };
 
-    await this.minioClient.putObject(
-      this.bucketName,
-      fileName,
-      file.buffer,
-      file.size,
-      metaData,
-    );
+    await this.minioClient.putObject(this.bucketName, fileName, file.buffer, file.size, metaData);
 
     const fileUrl = await this.getFileUrl(fileName);
 
@@ -69,13 +63,7 @@ export class UploadsService {
       'Content-Type': file.mimetype,
     };
 
-    await this.minioClient.putObject(
-      this.bucketName,
-      fileName,
-      file.buffer,
-      file.size,
-      metaData,
-    );
+    await this.minioClient.putObject(this.bucketName, fileName, file.buffer, file.size, metaData);
 
     const fileUrl = await this.getFileUrl(fileName);
 
@@ -101,7 +89,14 @@ export class UploadsService {
       `INSERT INTO media_files (user_id, file_name, file_type, file_size, file_url, media_type)
        VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING *`,
-      [userId, file.originalname, file.mimetype, file.size, fileUrl, this.getMediaType(file.mimetype)],
+      [
+        userId,
+        file.originalname,
+        file.mimetype,
+        file.size,
+        fileUrl,
+        this.getMediaType(file.mimetype),
+      ],
     );
     return result.rows[0];
   }

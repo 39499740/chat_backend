@@ -28,10 +28,7 @@ export class UploadsController {
   @ApiConsumes('multipart/form-data')
   @ApiResponse({ status: 201, description: '上传成功' })
   @UseInterceptors(FileInterceptor('file'))
-  async uploadFile(
-    @CurrentUser() user: any,
-    @UploadedFile() file: Express.Multer.File,
-  ) {
+  async uploadFile(@CurrentUser() user: any, @UploadedFile() file: Express.Multer.File) {
     if (!file) {
       throw new BadRequestException('请选择要上传的文件');
     }
@@ -44,10 +41,7 @@ export class UploadsController {
   @ApiConsumes('multipart/form-data')
   @ApiResponse({ status: 201, description: '上传成功' })
   @UseInterceptors(FileInterceptor('file'))
-  async uploadAvatar(
-    @CurrentUser() user: any,
-    @UploadedFile() file: Express.Multer.File,
-  ) {
+  async uploadAvatar(@CurrentUser() user: any, @UploadedFile() file: Express.Multer.File) {
     if (!file) {
       throw new BadRequestException('请选择要上传的文件');
     }

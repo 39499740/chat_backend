@@ -14,7 +14,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@ne
 import { MessagesService } from '../services/messages.service';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
-import { SendMessageDto, GetMessagesDto, MarkAsReadDto } from '../dto/send-message.dto';
+import { SendMessageDto, MarkAsReadDto } from '../dto/send-message.dto';
 
 @ApiTags('chat')
 @Controller('chat')
@@ -77,7 +77,7 @@ export class MessagesController {
   async markAsRead(
     @CurrentUser() user: any,
     @Param('messageId') messageId: string,
-    @Body() markAsReadDto: MarkAsReadDto,
+    @Body() _markAsReadDto: MarkAsReadDto,
   ) {
     return await this.messagesService.markAsRead(messageId, user.id);
   }

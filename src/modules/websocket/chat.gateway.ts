@@ -5,11 +5,13 @@ import {
   WebSocketServer,
   OnGatewayConnection,
   OnGatewayDisconnect,
-  MessageBody,
-  ConnectedSocket,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { MessagePayload, OnlineStatusPayload, TypingStatusPayload, MessageType } from '../../common/interfaces/gateway.interfaces';
+import {
+  MessagePayload,
+  OnlineStatusPayload,
+  TypingStatusPayload,
+} from '../../common/interfaces/gateway.interfaces';
 
 @WebSocketGateway({
   cors: {
@@ -17,8 +19,7 @@ import { MessagePayload, OnlineStatusPayload, TypingStatusPayload, MessageType }
   },
 })
 @Injectable()
-export class ChatGateway
-  implements OnGatewayConnection, OnGatewayDisconnect {
+export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
 
@@ -62,7 +63,6 @@ export class ChatGateway
 
       // 发送连接成功消息
       client.emit('connected', { userId, message: '连接成功' });
-
     } catch (error) {
       this.logger.error(`Authentication failed for client ${client.id}:`, error);
       client.disconnect(true);
@@ -86,18 +86,15 @@ export class ChatGateway
   }
 
   @SubscribeMessage('join_conversation')
-  async handleJoinConversation(
-    client: Socket,
-    payload: { conversationId: string },
-  ) {
+  async handleJoinConversation(client: Socket, payload: { conversationId: string }) {
     this.logger.log(`Client ${client.id} joining conversation: ${payload.conversationId}`);
-    
+
     const userId = this.getUserIdBySocket(client.id);
     if (!userId) return;
 
     // 加入会话房间
     client.join(`conversation:${payload.conversationId}`);
-    
+
     // 记录用户所在的会话
     if (!this.userConversations.has(userId)) {
       this.userConversations.set(userId, new Set());
@@ -112,18 +109,15 @@ export class ChatGateway
   }
 
   @SubscribeMessage('leave_conversation')
-  async handleLeaveConversation(
-    client: Socket,
-    payload: { conversationId: string },
-  ) {
+  async handleLeaveConversation(client: Socket, payload: { conversationId: string }) {
     this.logger.log(`Client ${client.id} leaving conversation: ${payload.conversationId}`);
-    
+
     const userId = this.getUserIdBySocket(client.id);
     if (!userId) return;
 
     // 离开会话房间
     client.leave(`conversation:${payload.conversationId}`);
-    
+
     // 从记录中移除
     this.userConversations.get(userId)?.delete(payload.conversationId);
 
@@ -135,12 +129,11 @@ export class ChatGateway
   }
 
   @SubscribeMessage('send_message')
-  async handleSendMessage(
-    client: Socket,
-    payload: MessagePayload,
-  ) {
-    this.logger.log(`Client ${client.id} sending message to conversation: ${payload.conversationId}`);
-    
+  async handleSendMessage(client: Socket, payload: MessagePayload) {
+    this.logger.log(
+      `Client ${client.id} sending message to conversation: ${payload.conversationId}`,
+    );
+
     const userId = this.getUserIdBySocket(client.id);
     if (!userId) return;
 
@@ -156,10 +149,7 @@ export class ChatGateway
   }
 
   @SubscribeMessage('typing_start')
-  async handleTypingStart(
-    client: Socket,
-    payload: TypingStatusPayload,
-  ) {
+  async handleTypingStart(client: Socket, payload: TypingStatusPayload) {
     const userId = this.getUserIdBySocket(client.id);
     if (!userId) return;
 
@@ -174,10 +164,7 @@ export class ChatGateway
   }
 
   @SubscribeMessage('typing_stop')
-  async handleTypingStop(
-    client: Socket,
-    payload: TypingStatusPayload,
-  ) {
+  async handleTypingStop(client: Socket, payload: TypingStatusPayload) {
     const userId = this.getUserIdBySocket(client.id);
     if (!userId) return;
 
@@ -192,10 +179,7 @@ export class ChatGateway
   }
 
   @SubscribeMessage('mark_as_read')
-  async handleMarkAsRead(
-    client: Socket,
-    payload: { conversationId: string; messageId: string },
-  ) {
+  async handleMarkAsRead(client: Socket, payload: { conversationId: string; messageId: string }) {
     const userId = this.getUserIdBySocket(client.id);
     if (!userId) return;
 
@@ -242,7 +226,7 @@ export class ChatGateway
     if (!userId) return;
 
     const onlineUserIds = Array.from(this.onlineUsers.keys());
-    
+
     client.emit('online_users', {
       users: onlineUserIds,
       currentUserId: userId,
@@ -251,10 +235,7 @@ export class ChatGateway
 
   // 获取会话成员列表
   @SubscribeMessage('get_conversation_members')
-  async handleGetConversationMembers(
-    client: Socket,
-    payload: { conversationId: string },
-  ) {
+  async handleGetConversationMembers(client: Socket, payload: { conversationId: string }) {
     const userId = this.getUserIdBySocket(client.id);
     if (!userId) return;
 
@@ -266,7 +247,7 @@ export class ChatGateway
 
     for (const [memberId, member] of this.onlineUsers.entries()) {
       if (member.userId === userId) continue; // 不包含自己
-      
+
       // 暂时返回所有在线用户（后续需要优化为仅返回会话成员）
       onlineMembers.push(memberId);
     }

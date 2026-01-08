@@ -117,7 +117,7 @@ export class MessagesService {
     const offset = (page - 1) * limit;
 
     let whereClause = 'WHERE conversation_id = $1 AND is_deleted = false';
-    let params: any[] = [limit, offset];
+    const params: any[] = [limit, offset];
 
     if (type !== undefined) {
       whereClause += ` AND type = $${params.length + 1}`;
@@ -150,7 +150,7 @@ export class MessagesService {
     };
   }
 
-  async getMessage(messageId: string, userId: string) {
+  async getMessage(messageId: string, _userId: string) {
     const result = await this.db.query(
       `SELECT m.*, u.username, u.nickname, u.avatar_url
        FROM messages m
@@ -240,7 +240,7 @@ export class MessagesService {
     conversationId: string,
     userId: string,
     lastMessageId?: string,
-    limit = 50,
+    _limit = 50,
   ) {
     const offset = lastMessageId ? 0 : 0;
 
@@ -265,7 +265,7 @@ export class MessagesService {
    * 获取消息的媒体信息
    */
   async getMessageMediaInfo(messageId: string, userId: string) {
-    const message = await this.getMessage(messageId, userId);
+    await this.getMessage(messageId, userId);
     return await this.mediaMessageService.getMessageMediaInfo(messageId);
   }
 }

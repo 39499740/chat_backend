@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { DatabaseService } from '../../../common/database/database.service';
 
 @Injectable()
@@ -31,7 +27,7 @@ export class MomentsService {
     const offset = (page - 1) * limit;
 
     let whereClause = '';
-    let params: any[] = [limit, offset];
+    const params: any[] = [limit, offset];
 
     if (type === 1) {
       // 仅好友动态
@@ -157,19 +153,16 @@ export class MomentsService {
   }
 
   async deletePost(postId: string, userId: string) {
-    const result = await this.db.query(
-      `SELECT * FROM posts WHERE id = $1 AND user_id = $2`,
-      [postId, userId],
-    );
+    const result = await this.db.query(`SELECT * FROM posts WHERE id = $1 AND user_id = $2`, [
+      postId,
+      userId,
+    ]);
 
     if (result.rows.length === 0) {
       throw new NotFoundException('动态不存在或无权限删除');
     }
 
-    await this.db.query(
-      `UPDATE posts SET is_deleted = true WHERE id = $1`,
-      [postId],
-    );
+    await this.db.query(`UPDATE posts SET is_deleted = true WHERE id = $1`, [postId]);
 
     return { message: '动态删除成功' };
   }
@@ -183,30 +176,24 @@ export class MomentsService {
 
     if (existing.rows.length > 0) {
       // 取消点赞
-      await this.db.query(
-        `DELETE FROM post_likes WHERE post_id = $1 AND user_id = $2`,
-        [postId, userId],
-      );
+      await this.db.query(`DELETE FROM post_likes WHERE post_id = $1 AND user_id = $2`, [
+        postId,
+        userId,
+      ]);
 
       // 减少点赞数
-      await this.db.query(
-        `UPDATE posts SET like_count = like_count - 1 WHERE id = $1`,
-        [postId],
-      );
+      await this.db.query(`UPDATE posts SET like_count = like_count - 1 WHERE id = $1`, [postId]);
 
       return { message: '已取消点赞', liked: false };
     } else {
       // 添加点赞
-      await this.db.query(
-        `INSERT INTO post_likes (post_id, user_id) VALUES ($1, $2)`,
-        [postId, userId],
-      );
+      await this.db.query(`INSERT INTO post_likes (post_id, user_id) VALUES ($1, $2)`, [
+        postId,
+        userId,
+      ]);
 
       // 增加点赞数
-      await this.db.query(
-        `UPDATE posts SET like_count = like_count + 1 WHERE id = $1`,
-        [postId],
-      );
+      await this.db.query(`UPDATE posts SET like_count = like_count + 1 WHERE id = $1`, [postId]);
 
       return { message: '点赞成功', liked: true };
     }
@@ -227,10 +214,9 @@ export class MomentsService {
     );
 
     // 增加评论数
-    await this.db.query(
-      `UPDATE posts SET comment_count = comment_count + 1 WHERE id = $1`,
-      [postId],
-    );
+    await this.db.query(`UPDATE posts SET comment_count = comment_count + 1 WHERE id = $1`, [
+      postId,
+    ]);
 
     return result.rows[0];
   }
@@ -267,25 +253,21 @@ export class MomentsService {
   }
 
   async deleteComment(commentId: string, userId: string) {
-    const result = await this.db.query(
-      `SELECT * FROM comments WHERE id = $1 AND user_id = $2`,
-      [commentId, userId],
-    );
+    const result = await this.db.query(`SELECT * FROM comments WHERE id = $1 AND user_id = $2`, [
+      commentId,
+      userId,
+    ]);
 
     if (result.rows.length === 0) {
       throw new NotFoundException('评论不存在或无权限删除');
     }
 
-    await this.db.query(
-      `UPDATE comments SET is_deleted = true WHERE id = $1`,
-      [commentId],
-    );
+    await this.db.query(`UPDATE comments SET is_deleted = true WHERE id = $1`, [commentId]);
 
     // 减少评论数
-    await this.db.query(
-      `UPDATE posts SET comment_count = comment_count - 1 WHERE id = $1`,
-      [result.rows[0].post_id],
-    );
+    await this.db.query(`UPDATE posts SET comment_count = comment_count - 1 WHERE id = $1`, [
+      result.rows[0].post_id,
+    ]);
 
     return { message: '评论删除成功' };
   }
@@ -299,30 +281,28 @@ export class MomentsService {
 
     if (existing.rows.length > 0) {
       // 取消点赞
-      await this.db.query(
-        `DELETE FROM comment_likes WHERE comment_id = $1 AND user_id = $2`,
-        [commentId, userId],
-      );
+      await this.db.query(`DELETE FROM comment_likes WHERE comment_id = $1 AND user_id = $2`, [
+        commentId,
+        userId,
+      ]);
 
       // 减少点赞数
-      await this.db.query(
-        `UPDATE comments SET like_count = like_count - 1 WHERE id = $1`,
-        [commentId],
-      );
+      await this.db.query(`UPDATE comments SET like_count = like_count - 1 WHERE id = $1`, [
+        commentId,
+      ]);
 
       return { message: '已取消点赞', liked: false };
     } else {
       // 添加点赞
-      await this.db.query(
-        `INSERT INTO comment_likes (comment_id, user_id) VALUES ($1, $2)`,
-        [commentId, userId],
-      );
+      await this.db.query(`INSERT INTO comment_likes (comment_id, user_id) VALUES ($1, $2)`, [
+        commentId,
+        userId,
+      ]);
 
       // 增加点赞数
-      await this.db.query(
-        `UPDATE comments SET like_count = like_count + 1 WHERE id = $1`,
-        [commentId],
-      );
+      await this.db.query(`UPDATE comments SET like_count = like_count + 1 WHERE id = $1`, [
+        commentId,
+      ]);
 
       return { message: '点赞成功', liked: true };
     }

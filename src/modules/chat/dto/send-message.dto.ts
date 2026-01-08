@@ -1,13 +1,4 @@
-import {
-  IsUUID,
-  IsOptional,
-  IsEnum,
-  IsString,
-  IsInt,
-  MinLength,
-  MaxLength,
-  IsArray,
-} from 'class-validator';
+import { IsUUID, IsOptional, IsEnum, IsString, IsInt, MaxLength, IsArray } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export enum MessageType {

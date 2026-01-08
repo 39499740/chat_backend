@@ -100,7 +100,7 @@ export class MediaMessageService {
    */
   async processImageMessage(messageId: string, mediaUrls: string[]): Promise<void> {
     try {
-      for (const url of mediaUrls) {
+      for (const _url of mediaUrls) {
         // TODO: 实现缩略图生成逻辑
         // const thumbnailUrl = await this.generateThumbnail(url);
         // await this.saveThumbnail(messageId, url, thumbnailUrl);
@@ -118,7 +118,7 @@ export class MediaMessageService {
    */
   async processVideoMessage(messageId: string, mediaUrls: string[]): Promise<void> {
     try {
-      for (const url of mediaUrls) {
+      for (const _url of mediaUrls) {
         // TODO: 实现视频缩略图生成逻辑
         // const thumbnailUrl = await this.generateVideoThumbnail(url);
         // await this.saveThumbnail(messageId, url, thumbnailUrl);
@@ -140,7 +140,7 @@ export class MediaMessageService {
    */
   async processAudioMessage(messageId: string, mediaUrls: string[]): Promise<void> {
     try {
-      for (const url of mediaUrls) {
+      for (const _url of mediaUrls) {
         // TODO: 获取音频元数据（时长、格式等）
         // const metadata = await this.getAudioMetadata(url);
         // await this.saveAudioMetadata(messageId, url, metadata);
@@ -156,7 +156,7 @@ export class MediaMessageService {
   /**
    * 处理表情消息
    */
-  async processEmojiMessage(messageId: string, content: string): Promise<void> {
+  async processEmojiMessage(messageId: string, _content: string): Promise<void> {
     try {
       // 验证表情是否有效
       // 可以使用表情库或自定义表情列表进行验证
@@ -173,7 +173,7 @@ export class MediaMessageService {
    */
   async processFileMessage(messageId: string, mediaUrls: string[]): Promise<void> {
     try {
-      for (const url of mediaUrls) {
+      for (const _url of mediaUrls) {
         // TODO: 获取文件元数据（文件名、大小、类型等）
         // const metadata = await this.getFileMetadata(url);
         // await this.saveFileMetadata(messageId, url, metadata);

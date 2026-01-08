@@ -1,7 +1,5 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException, Inject } from '@nestjs/common';
 import { DatabaseService } from '../../../common/database/database.service';
-import { v4 as uuidv4 } from 'uuid';
-import { Inject } from '@nestjs/common';
 import { GroupChatNotificationService } from '../../chat/services/group-chat-notification.service';
 
 @Injectable()

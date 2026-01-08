@@ -3,7 +3,6 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@ne
 import { SearchService, SearchType } from '../services/search.service';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
-import { SearchDto, SearchSuggestionsDto } from '../dto/search.dto';
 
 @ApiTags('search')
 @Controller('search')

@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsArray, IsEnum, IsDateString } from 'class-validator';
+import { IsString, IsOptional, IsArray, IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export enum PostVisibility {

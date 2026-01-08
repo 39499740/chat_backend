@@ -10,18 +10,11 @@ import {
   ParseIntPipe,
   DefaultValuePipe,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-  ApiQuery,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { MomentsService } from '../services/moments.service';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { CreatePostDto } from '../dto/create-post.dto';
-import { GetFeedDto } from '../dto/get-feed.dto';
 
 @ApiTags('moments')
 @Controller('moments')
@@ -33,10 +26,7 @@ export class MomentsController {
   @Post('posts')
   @ApiOperation({ summary: '发布动态' })
   @ApiResponse({ status: 201, description: '发布成功' })
-  async createPost(
-    @CurrentUser() user: any,
-    @Body() createPostDto: CreatePostDto,
-  ) {
+  async createPost(@CurrentUser() user: any, @Body() createPostDto: CreatePostDto) {
     return await this.momentsService.createPost(user.id, createPostDto);
   }
 
@@ -72,30 +62,21 @@ export class MomentsController {
   @Get('posts/:postId')
   @ApiOperation({ summary: '获取动态详情' })
   @ApiResponse({ status: 200, description: '获取成功' })
-  async getPostDetail(
-    @CurrentUser() user: any,
-    @Param('postId') postId: string,
-  ) {
+  async getPostDetail(@CurrentUser() user: any, @Param('postId') postId: string) {
     return await this.momentsService.getPostDetail(postId, user.id);
   }
 
   @Delete('posts/:postId')
   @ApiOperation({ summary: '删除动态' })
   @ApiResponse({ status: 200, description: '删除成功' })
-  async deletePost(
-    @CurrentUser() user: any,
-    @Param('postId') postId: string,
-  ) {
+  async deletePost(@CurrentUser() user: any, @Param('postId') postId: string) {
     return await this.momentsService.deletePost(postId, user.id);
   }
 
   @Post('posts/:postId/like')
   @ApiOperation({ summary: '点赞动态' })
   @ApiResponse({ status: 200, description: '操作成功' })
-  async likePost(
-    @CurrentUser() user: any,
-    @Param('postId') postId: string,
-  ) {
+  async likePost(@CurrentUser() user: any, @Param('postId') postId: string) {
     return await this.momentsService.likePost(postId, user.id);
   }
 
@@ -128,20 +109,14 @@ export class MomentsController {
   @Delete('comments/:commentId')
   @ApiOperation({ summary: '删除评论' })
   @ApiResponse({ status: 200, description: '删除成功' })
-  async deleteComment(
-    @CurrentUser() user: any,
-    @Param('commentId') commentId: string,
-  ) {
+  async deleteComment(@CurrentUser() user: any, @Param('commentId') commentId: string) {
     return await this.momentsService.deleteComment(commentId, user.id);
   }
 
   @Post('comments/:commentId/like')
   @ApiOperation({ summary: '点赞评论' })
   @ApiResponse({ status: 200, description: '操作成功' })
-  async likeComment(
-    @CurrentUser() user: any,
-    @Param('commentId') commentId: string,
-  ) {
+  async likeComment(@CurrentUser() user: any, @Param('commentId') commentId: string) {
     return await this.momentsService.likeComment(commentId, user.id);
   }
 }

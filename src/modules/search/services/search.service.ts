@@ -41,7 +41,6 @@ export class SearchService {
     conversations?: any[];
   }> {
     const { page = 1, limit = 20 } = options;
-    const offset = (page - 1) * limit;
 
     const searchQuery = `%${query.trim()}%`;
 

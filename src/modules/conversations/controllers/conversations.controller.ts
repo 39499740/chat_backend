@@ -11,19 +11,12 @@ import {
   ParseIntPipe,
   DefaultValuePipe,
 } from '@nestjs/common';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBearerAuth,
-  ApiQuery,
-} from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { ConversationsService } from '../services/conversations.service';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../../common/decorators/current-user.decorator';
 import { CreateConversationDto } from '../dto/create-conversation.dto';
 import { UpdateConversationDto } from '../dto/update-conversation.dto';
-import { GetConversationsDto } from '../dto/get-conversations.dto';
 
 @ApiTags('conversations')
 @Controller('conversations')
@@ -100,11 +93,7 @@ export class ConversationsController {
     @Param('conversationId') conversationId: string,
     @Body('memberId') memberUserId: string,
   ) {
-    return await this.conversationsService.addMember(
-      conversationId,
-      user.id,
-      memberUserId,
-    );
+    return await this.conversationsService.addMember(conversationId, user.id, memberUserId);
   }
 
   @Delete(':conversationId/members/:memberId')
@@ -115,10 +104,6 @@ export class ConversationsController {
     @Param('conversationId') conversationId: string,
     @Param('memberId') memberUserId: string,
   ) {
-    return await this.conversationsService.removeMember(
-      conversationId,
-      user.id,
-      memberUserId,
-    );
+    return await this.conversationsService.removeMember(conversationId, user.id, memberUserId);
   }
 }

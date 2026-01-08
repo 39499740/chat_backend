@@ -31,10 +31,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
     await this.pool.end();
   }
 
-  async query<T = any>(
-    text: string,
-    params?: any[],
-  ): Promise<QueryResult<T>> {
+  async query<T = any>(text: string, params?: any[]): Promise<QueryResult<T>> {
     const start = Date.now();
     const res = await this.pool.query<T>(text, params);
     const duration = Date.now() - start;
@@ -46,9 +43,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
     return this.pool.connect();
   }
 
-  async transaction<T>(
-    callback: (client: PoolClient) => Promise<T>,
-  ): Promise<T> {
+  async transaction<T>(callback: (client: PoolClient) => Promise<T>): Promise<T> {
     const client = await this.getClient();
     try {
       await client.query('BEGIN');

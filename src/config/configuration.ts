@@ -1,5 +1,4 @@
 import { registerAs } from '@nestjs/config';
-import { EnvironmentVariables } from './env.interface';
 
 export const appConfig = registerAs('app', () => ({
   nodeEnv: process.env.NODE_ENV || 'development',
@@ -44,8 +43,7 @@ export const jwtConfig = registerAs('jwt', () => ({
 export const uploadConfig = registerAs('upload', () => ({
   maxFileSize: parseInt(process.env.UPLOAD_MAX_FILE_SIZE, 10) || 10485760, // 10MB
   allowedTypes:
-    process.env.UPLOAD_ALLOWED_TYPES ||
-    'image/jpeg,image/png,image/gif,video/mp4,audio/mpeg',
+    process.env.UPLOAD_ALLOWED_TYPES || 'image/jpeg,image/png,image/gif,video/mp4,audio/mpeg',
 }));
 
 export const wsConfig = registerAs('ws', () => ({

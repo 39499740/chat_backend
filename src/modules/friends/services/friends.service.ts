@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { DatabaseService } from '../../../common/database/database.service';
 
 @Injectable()
@@ -76,10 +72,7 @@ export class FriendsService {
     const friendRequest = request.rows[0];
 
     // 更新请求状态为已接受
-    await this.db.query(
-      `UPDATE friend_requests SET status = 1 WHERE id = $1`,
-      [requestId],
-    );
+    await this.db.query(`UPDATE friend_requests SET status = 1 WHERE id = $1`, [requestId]);
 
     // 创建好友关系
     await this.db.query(
@@ -105,10 +98,7 @@ export class FriendsService {
     }
 
     // 更新请求状态为已拒绝
-    await this.db.query(
-      `UPDATE friend_requests SET status = 2 WHERE id = $1`,
-      [requestId],
-    );
+    await this.db.query(`UPDATE friend_requests SET status = 2 WHERE id = $1`, [requestId]);
 
     return { message: '已拒绝好友请求' };
   }
