@@ -150,7 +150,7 @@ export class MessagesService {
     };
   }
 
-  async getMessage(messageId: string, _userId: string) {
+  async getMessage(messageId: string, userId: string) {
     const result = await this.db.query(
       `SELECT m.*, u.username, u.nickname, u.avatar_url
        FROM messages m
@@ -163,6 +163,7 @@ export class MessagesService {
       throw new NotFoundException('消息不存在');
     }
 
+    void userId;
     return result.rows[0];
   }
 
@@ -236,28 +237,20 @@ export class MessagesService {
     return parseInt((result.rows[0] as any).count);
   }
 
-  async getConversationHistory(
-    conversationId: string,
-    userId: string,
-    lastMessageId?: string,
-    _limit = 50,
-  ) {
-    const offset = lastMessageId ? 0 : 0;
-
+  async getConversationHistory(conversationId: string, userId: string, lastMessageId?: string) {
+    void lastMessageId;
     const result = await this.db.query(
       `SELECT m.*, u.username, u.nickname, u.avatar_url
        FROM messages m
        JOIN users u ON m.sender_id = u.id
        WHERE m.conversation_id = $1
-         AND m.id < (
-           SELECT MAX(id) FROM messages WHERE conversation_id = $1
-         )
          AND m.is_deleted = false
        ORDER BY m.created_at DESC
-       LIMIT $${offset + 1}`,
-      [conversationId, lastMessageId],
+       LIMIT 50`,
+      [conversationId],
     );
 
+    void userId;
     return result.rows;
   }
 
@@ -265,6 +258,7 @@ export class MessagesService {
    * 获取消息的媒体信息
    */
   async getMessageMediaInfo(messageId: string, userId: string) {
+    void userId;
     await this.getMessage(messageId, userId);
     return await this.mediaMessageService.getMessageMediaInfo(messageId);
   }

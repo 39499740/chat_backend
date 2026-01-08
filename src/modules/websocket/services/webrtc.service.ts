@@ -393,9 +393,10 @@ export class WebRTCService {
    * 根据用户ID获取Socket ID
    * 注意：这需要在ChatGateway中实现对应的方法
    */
-  private getSocketIdByUserId(_userId: string): string | null {
+  private getSocketIdByUserId(userId: string): string | null {
     // TODO: 实现从ChatGateway获取用户Socket ID的逻辑
     // 可能需要在ChatGateway中添加一个公开的方法来查询用户的Socket连接
+    void userId;
     return null; // 临时返回null，需要集成ChatGateway的在线用户映射
   }
 

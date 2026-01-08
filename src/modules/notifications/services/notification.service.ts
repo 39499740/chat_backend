@@ -329,6 +329,7 @@ export class NotificationService {
    */
   private getSocketIdByUserId(userId: string): string | null {
     // TODO: 实现从ChatGateway获取用户Socket ID的逻辑
+    void userId;
     return null;
   }
 

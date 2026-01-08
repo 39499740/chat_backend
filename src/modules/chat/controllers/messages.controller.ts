@@ -77,8 +77,9 @@ export class MessagesController {
   async markAsRead(
     @CurrentUser() user: any,
     @Param('messageId') messageId: string,
-    @Body() _markAsReadDto: MarkAsReadDto,
+    @Body() markAsReadDto: MarkAsReadDto,
   ) {
+    void markAsReadDto;
     return await this.messagesService.markAsRead(messageId, user.id);
   }
 }

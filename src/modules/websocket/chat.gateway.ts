@@ -215,6 +215,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // 通知所有在线的好友
     for (const [friendUserId, friend] of this.onlineUsers.entries()) {
       // 暂时通知所有在线用户（后续需要优化为仅通知好友）
+      void friendUserId;
       this.server.to(friend.socket.id).emit('friend_status', payload as any);
     }
   }

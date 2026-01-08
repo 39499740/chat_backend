@@ -100,13 +100,14 @@ export class MediaMessageService {
    */
   async processImageMessage(messageId: string, mediaUrls: string[]): Promise<void> {
     try {
-      for (const _url of mediaUrls) {
-        // TODO: 实现缩略图生成逻辑
-        // const thumbnailUrl = await this.generateThumbnail(url);
-        // await this.saveThumbnail(messageId, url, thumbnailUrl);
+      // TODO: 实现缩略图生成逻辑
+      // for (const url of mediaUrls) {
+      //   const thumbnailUrl = await this.generateThumbnail(url);
+      //   await this.saveThumbnail(messageId, url, thumbnailUrl);
+      // }
+      void mediaUrls;
 
-        this.logger.log(`Image message processed: ${messageId}`);
-      }
+      this.logger.log(`Image message processed: ${messageId}`);
     } catch (error) {
       this.logger.error(`Error processing image message: ${error.message}`);
       // 不抛出错误，允许消息发送成功
@@ -118,17 +119,18 @@ export class MediaMessageService {
    */
   async processVideoMessage(messageId: string, mediaUrls: string[]): Promise<void> {
     try {
-      for (const _url of mediaUrls) {
-        // TODO: 实现视频缩略图生成逻辑
-        // const thumbnailUrl = await this.generateVideoThumbnail(url);
-        // await this.saveThumbnail(messageId, url, thumbnailUrl);
+      // TODO: 实现视频缩略图生成逻辑
+      // for (const url of mediaUrls) {
+      //   const thumbnailUrl = await this.generateVideoThumbnail(url);
+      //   await this.saveThumbnail(messageId, url, thumbnailUrl);
+      //
+      //   // TODO: 获取视频元数据（时长、分辨率等）
+      //   const metadata = await this.getVideoMetadata(url);
+      //   await this.saveVideoMetadata(messageId, url, metadata);
+      // }
+      void mediaUrls;
 
-        // TODO: 获取视频元数据（时长、分辨率等）
-        // const metadata = await this.getVideoMetadata(url);
-        // await this.saveVideoMetadata(messageId, url, metadata);
-
-        this.logger.log(`Video message processed: ${messageId}`);
-      }
+      this.logger.log(`Video message processed: ${messageId}`);
     } catch (error) {
       this.logger.error(`Error processing video message: ${error.message}`);
       // 不抛出错误，允许消息发送成功
@@ -140,13 +142,14 @@ export class MediaMessageService {
    */
   async processAudioMessage(messageId: string, mediaUrls: string[]): Promise<void> {
     try {
-      for (const _url of mediaUrls) {
-        // TODO: 获取音频元数据（时长、格式等）
-        // const metadata = await this.getAudioMetadata(url);
-        // await this.saveAudioMetadata(messageId, url, metadata);
+      // TODO: 获取音频元数据（时长、格式等）
+      // for (const url of mediaUrls) {
+      //   const metadata = await this.getAudioMetadata(url);
+      //   await this.saveAudioMetadata(messageId, url, metadata);
+      // }
+      void mediaUrls;
 
-        this.logger.log(`Audio message processed: ${messageId}`);
-      }
+      this.logger.log(`Audio message processed: ${messageId}`);
     } catch (error) {
       this.logger.error(`Error processing audio message: ${error.message}`);
       // 不抛出错误，允许消息发送成功
@@ -156,10 +159,11 @@ export class MediaMessageService {
   /**
    * 处理表情消息
    */
-  async processEmojiMessage(messageId: string, _content: string): Promise<void> {
+  async processEmojiMessage(messageId: string, content: string): Promise<void> {
     try {
-      // 验证表情是否有效
+      // TODO: 验证表情是否有效
       // 可以使用表情库或自定义表情列表进行验证
+      void content;
 
       this.logger.log(`Emoji message processed: ${messageId}`);
     } catch (error) {
@@ -173,13 +177,14 @@ export class MediaMessageService {
    */
   async processFileMessage(messageId: string, mediaUrls: string[]): Promise<void> {
     try {
-      for (const _url of mediaUrls) {
-        // TODO: 获取文件元数据（文件名、大小、类型等）
-        // const metadata = await this.getFileMetadata(url);
-        // await this.saveFileMetadata(messageId, url, metadata);
+      // TODO: 获取文件元数据（文件名、大小、类型等）
+      // for (const url of mediaUrls) {
+      //   const metadata = await this.getFileMetadata(url);
+      //   await this.saveFileMetadata(messageId, url, metadata);
+      // }
+      void mediaUrls;
 
-        this.logger.log(`File message processed: ${messageId}`);
-      }
+      this.logger.log(`File message processed: ${messageId}`);
     } catch (error) {
       this.logger.error(`Error processing file message: ${error.message}`);
       // 不抛出错误，允许消息发送成功
