@@ -1,27 +1,27 @@
 version: '3.8'
 
 services:
-  # PostgreSQL 数据库
-  postgres:
-    image: postgres:16-alpine
-    container_name: chat_postgres
+  # MySQL 数据库
+  mysql:
+    image: mysql:8.0
+    container_name: chat_mysql
     environment:
-      POSTGRES_USER: chat_user
-      POSTGRES_PASSWORD: chat_password
-      POSTGRES_DB: chat_backend
-      PGDATA: /var/lib/postgresql/data/pgdata
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: chat_backend
+      MYSQL_USER: chat_user
+      MYSQL_PASSWORD: chat_password
+      TZ: UTC
     ports:
-      - "5432:5432"
+      - '3307:3306'
     volumes:
-      - ./docker/postgres/data:/var/lib/postgresql/data
-      - ./docker/postgres/init:/docker-entrypoint-initdb.d
+      - ./docker/mysql/data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d
+      - ./docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U chat_user"]
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost', '-u', 'root', '-proot_password']
       interval: 10s
       timeout: 5s
       retries: 5
-    networks:
-      - chat_network
 
   # Redis 缓存
   redis:
@@ -29,16 +29,14 @@ services:
     container_name: chat_redis
     command: redis-server --appendonly yes --requirepass redis_password
     ports:
-      - "6379:6379"
+      - '6379:6379'
     volumes:
       - ./docker/redis/data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 10s
       timeout: 5s
       retries: 5
-    networks:
-      - chat_network
 
   # MinIO 对象存储
   minio:
@@ -49,23 +47,17 @@ services:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
     ports:
-      - "9000:9000"  # API端口
-      - "9001:9001"  # 控制台端口
+      - '9000:9000' # API端口
+      - '9001:9001' # 控制台端口
     volumes:
       - ./docker/minio/data:/data
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      test: ['CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live']
       interval: 30s
       timeout: 20s
       retries: 3
-    networks:
-      - chat_network
-
-networks:
-  chat_network:
-    driver: bridge
 
 volumes:
-  postgres_data:
+  mysql_data:
   redis_data:
   minio_data:

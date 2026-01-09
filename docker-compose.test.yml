@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  mysql-test:
+    image: mysql:8.0
+    container_name: chat_mysql_test
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: chat_backend_test
+      MYSQL_USER: chat_user
+      MYSQL_PASSWORD: chat_password
+    ports:
+      - 3308:3306
+    volumes:
+      - mysql-test-data:/var/lib/mysql
+    command: --default-authentication-plugin=mysql_native_password
+    healthcheck:
+      test: ['CMD', 'mysqladmin', 'ping', '-h', 'localhost']
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  redis-test:
+    image: redis:7-alpine
+    container_name: chat_redis_test
+    ports:
+      - 6380:6379
+    volumes:
+      - redis-test-data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  minio-test:
+    image: minio/minio:latest
+    container_name: chat_minio_test
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - 9001:9000
+      - 9002:9001
+    volumes:
+      - minio-test-data:/data
+    command: server /data
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live']
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  mysql-test-data:
+    driver: local
+  redis-test-data:
+    driver: local
+  minio-test-data:
+    driver: local

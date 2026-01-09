@@ -46,10 +46,9 @@ export class NotificationService {
   async createNotification(payload: NotificationPayload): Promise<void> {
     try {
       // 保存到数据库
-      const result = await this.db.query(
+      await this.db.query(
         `INSERT INTO notifications (user_id, type, title, content, data, related_id, related_type, metadata, is_read, created_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, FALSE, NOW())
-         RETURNING *`,
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, FALSE, NOW())`,
         [
           payload.userId,
           payload.type,
@@ -62,6 +61,13 @@ export class NotificationService {
         ],
       );
 
+      const result = await this.db.query(
+        `SELECT * FROM notifications
+         WHERE user_id = $1 AND type = $2 AND title = $3
+         ORDER BY created_at DESC LIMIT 1`,
+        [payload.userId, payload.type, payload.title],
+      );
+
       const notification = result.rows[0];
 
       // 缓存到Redis（用于快速获取）
@@ -72,7 +78,10 @@ export class NotificationService {
 
       this.logger.log(`Notification created for user ${payload.userId}: ${payload.type}`);
     } catch (error) {
-      this.logger.error(`Error creating notification: ${error.message}`, error.stack);
+      this.logger.error(
+        `Error creating notification: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
     }
   }
 
@@ -93,7 +102,10 @@ export class NotificationService {
 
       this.logger.log(`Bulk notifications created for ${userIds.length} users`);
     } catch (error) {
-      this.logger.error(`Error creating bulk notifications: ${error.message}`, error.stack);
+      this.logger.error(
+        `Error creating bulk notifications: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
     }
   }
 
@@ -165,10 +177,14 @@ export class NotificationService {
    */
   async markAsRead(notificationId: string, userId: string): Promise<void> {
     try {
-      const result = await this.db.query(
+      await this.db.execute(
         `UPDATE notifications SET is_read = TRUE, read_at = NOW()
-         WHERE id = $1 AND user_id = $2
-         RETURNING *`,
+         WHERE id = ? AND user_id = ?`,
+        [notificationId, userId],
+      );
+
+      const result = await this.db.query(
+        `SELECT * FROM notifications WHERE id = ? AND user_id = ?`,
         [notificationId, userId],
       );
 
@@ -183,7 +199,10 @@ export class NotificationService {
 
       this.logger.log(`Notification marked as read: ${notificationId}`);
     } catch (error) {
-      this.logger.error(`Error marking notification as read: ${error.message}`, error.stack);
+      this.logger.error(
+        `Error marking notification as read: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       throw error;
     }
   }
@@ -193,14 +212,13 @@ export class NotificationService {
    */
   async markAllAsRead(userId: string): Promise<number> {
     try {
-      const result = await this.db.query(
+      const updateResult = await this.db.execute(
         `UPDATE notifications SET is_read = TRUE, read_at = NOW()
-         WHERE user_id = $1 AND is_read = FALSE
-         RETURNING id`,
+           WHERE user_id = ? AND is_read = FALSE`,
         [userId],
       );
 
-      const count = result.rows.length;
+      const count = updateResult.affectedRows || 0;
 
       // 清除用户的通知缓存
       await this.clearUserNotificationCache(userId);
@@ -211,7 +229,10 @@ export class NotificationService {
 
       return count;
     } catch (error) {
-      this.logger.error(`Error marking all notifications as read: ${error.message}`, error.stack);
+      this.logger.error(
+        `Error marking all notifications as read: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       return 0;
     }
   }
@@ -221,12 +242,12 @@ export class NotificationService {
    */
   async deleteNotification(notificationId: string, userId: string): Promise<void> {
     try {
-      const result = await this.db.query(
-        `DELETE FROM notifications WHERE id = $1 AND user_id = $2 RETURNING id`,
+      const result = await this.db.execute(
+        `DELETE FROM notifications WHERE id = ? AND user_id = ?`,
         [notificationId, userId],
       );
 
-      if (result.rows.length === 0) {
+      if (result.affectedRows === 0) {
         throw new Error('通知不存在');
       }
 
@@ -235,7 +256,10 @@ export class NotificationService {
 
       this.logger.log(`Notification deleted: ${notificationId}`);
     } catch (error) {
-      this.logger.error(`Error deleting notification: ${error.message}`, error.stack);
+      this.logger.error(
+        `Error deleting notification: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       throw error;
     }
   }
@@ -252,7 +276,10 @@ export class NotificationService {
 
       return parseInt((result.rows[0] as any).count);
     } catch (error) {
-      this.logger.error(`Error getting unread count: ${error.message}`, error.stack);
+      this.logger.error(
+        `Error getting unread count: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       return 0;
     }
   }
@@ -284,7 +311,10 @@ export class NotificationService {
         }
       }
     } catch (error) {
-      this.logger.error(`Error pushing notification: ${error.message}`, error.stack);
+      this.logger.error(
+        `Error pushing notification: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
     }
   }
 
@@ -296,7 +326,9 @@ export class NotificationService {
       const key = `notification:${notification.user_id}:${notification.id}`;
       await this.redisService.set(key, JSON.stringify(notification), this.NOTIFICATION_TTL);
     } catch (error) {
-      this.logger.error(`Error caching notification: ${error.message}`);
+      this.logger.error(
+        `Error caching notification: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 
@@ -308,7 +340,9 @@ export class NotificationService {
       const key = `notification:${notification.user_id}:${notification.id}`;
       await this.redisService.del(key);
     } catch (error) {
-      this.logger.error(`Error removing notification from cache: ${error.message}`);
+      this.logger.error(
+        `Error removing notification from cache: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 
@@ -320,7 +354,9 @@ export class NotificationService {
       const key = `notifications:${userId}`;
       await this.redisService.del(key);
     } catch (error) {
-      this.logger.error(`Error clearing user notification cache: ${error.message}`);
+      this.logger.error(
+        `Error clearing user notification cache: ${error instanceof Error ? error.message : String(error)}`,
+      );
     }
   }
 

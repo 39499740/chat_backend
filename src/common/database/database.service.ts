@@ -1,6 +1,14 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Pool, PoolClient, QueryResult } from 'pg';
+import {
+  createPool,
+  Pool,
+  PoolConnection,
+  RowDataPacket,
+  OkPacket,
+  ResultSetHeader,
+} from 'mysql2/promise';
+import { QueryError, FieldPacket } from 'mysql2/promise';
 
 @Injectable()
 export class DatabaseService implements OnModuleInit, OnModuleDestroy {
@@ -9,52 +17,75 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   constructor(private configService: ConfigService) {}
 
   async onModuleInit() {
-    this.pool = new Pool({
+    this.pool = createPool({
       host: this.configService.get('database.host'),
       port: this.configService.get('database.port'),
       user: this.configService.get('database.username'),
       password: this.configService.get('database.password'),
       database: this.configService.get('database.database'),
-      max: 20,
-      idleTimeoutMillis: 30000,
-      connectionTimeoutMillis: 2000,
+      waitForConnections: true,
+      connectionLimit: 20,
+      queueLimit: 0,
+      enableKeepAlive: true,
+      keepAliveInitialDelay: 0,
     });
-
-    // 测试连接
-    const client = await this.pool.connect();
-    await client.query('SELECT NOW()');
-    client.release();
-    console.log('✅ Database connected successfully');
+    console.log('✅ Database initialized');
+    console.log('Database config:', {
+      host: this.configService.get('database.host'),
+      port: this.configService.get('database.port'),
+      user: this.configService.get('database.username'),
+      database: this.configService.get('database.database'),
+    });
   }
 
   async onModuleDestroy() {
-    await this.pool.end();
-  }
-
-  async query<T = any>(text: string, params?: any[]): Promise<QueryResult<T>> {
-    const start = Date.now();
-    const res = await this.pool.query<T>(text, params);
-    const duration = Date.now() - start;
-    console.log('Executed query', { text, duration, rows: res.rowCount });
-    return res;
-  }
-
-  async getClient(): Promise<PoolClient> {
-    return this.pool.connect();
-  }
-
-  async transaction<T>(callback: (client: PoolClient) => Promise<T>): Promise<T> {
-    const client = await this.getClient();
     try {
-      await client.query('BEGIN');
-      const result = await callback(client);
-      await client.query('COMMIT');
+      await this.pool.end();
+      console.log('✅ Database connection pool closed');
+    } catch (error) {
+      console.error(
+        '⚠️  Error closing database pool:',
+        error instanceof Error ? error.message : String(error),
+      );
+    }
+  }
+
+  async query<T = any>(text: string, params?: any[]): Promise<{ rows: T[] }> {
+    const start = Date.now();
+    const [rows, fields] = await this.pool.query(text, params);
+    const duration = Date.now() - start;
+    console.log('Executed query', { text, duration, rows: Array.isArray(rows) ? rows.length : 1 });
+    return { rows: rows as T[] };
+  }
+
+  async execute(text: string, params?: any[]): Promise<OkPacket> {
+    const start = Date.now();
+    const [result] = await this.pool.execute(text, params);
+    const duration = Date.now() - start;
+    console.log('Executed command', {
+      text,
+      duration,
+      affectedRows: (result as OkPacket).affectedRows,
+    });
+    return result as OkPacket;
+  }
+
+  async getConnection(): Promise<PoolConnection> {
+    return await this.pool.getConnection();
+  }
+
+  async transaction<T>(callback: (connection: PoolConnection) => Promise<T>): Promise<T> {
+    const connection = await this.getConnection();
+    try {
+      await connection.beginTransaction();
+      const result = await callback(connection);
+      await connection.commit();
       return result;
     } catch (error) {
-      await client.query('ROLLBACK');
+      await connection.rollback();
       throw error;
     } finally {
-      client.release();
+      connection.release();
     }
   }
 }

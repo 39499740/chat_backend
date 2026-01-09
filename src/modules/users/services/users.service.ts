@@ -61,10 +61,12 @@ export class UsersService {
 
     values.push(userId);
 
+    await this.db.query(`UPDATE users SET ${fields.join(', ')} WHERE id = $${paramIndex}`, values);
+
     const result = await this.db.query(
-      `UPDATE users SET ${fields.join(', ')} WHERE id = $${paramIndex}
-       RETURNING id, username, email, nickname, avatar_url, bio, gender, birth_date, region, is_verified, updated_at`,
-      values,
+      `SELECT id, username, email, nickname, avatar_url, bio, gender, birth_date, region, is_verified, updated_at
+       FROM users WHERE id = $1`,
+      [userId],
     );
 
     if (result.rows.length === 0) {
@@ -105,10 +107,11 @@ export class UsersService {
   }
 
   async uploadAvatar(userId: string, avatarUrl: string) {
+    await this.db.query(`UPDATE users SET avatar_url = $1 WHERE id = $2`, [avatarUrl, userId]);
+
     const result = await this.db.query(
-      `UPDATE users SET avatar_url = $1 WHERE id = $2
-       RETURNING id, username, email, nickname, avatar_url`,
-      [avatarUrl, userId],
+      `SELECT id, username, email, nickname, avatar_url FROM users WHERE id = $1`,
+      [userId],
     );
 
     if (result.rows.length === 0) {
@@ -118,12 +121,12 @@ export class UsersService {
     return result.rows[0];
   }
 
-  async getUserSettings(userId: string) {
-    const result = await this.db.query(`SELECT * FROM user_settings WHERE user_id = $1`, [userId]);
+  async getUserSettings(userId: string): Promise<any> {
+    const result = await this.db.query(`SELECT * FROM user_settings WHERE user_id = ?`, [userId]);
 
     if (result.rows.length === 0) {
       // 如果用户设置不存在，创建默认设置
-      await this.db.query(`INSERT INTO user_settings (user_id) VALUES ($1)`, [userId]);
+      await this.db.query(`INSERT INTO user_settings (user_id) VALUES (?)`, [userId]);
       return await this.getUserSettings(userId);
     }
 
@@ -165,11 +168,12 @@ export class UsersService {
 
     values.push(userId);
 
-    const result = await this.db.query(
-      `UPDATE user_settings SET ${fields.join(', ')} WHERE user_id = $${paramIndex}
-       RETURNING *`,
+    await this.db.query(
+      `UPDATE user_settings SET ${fields.join(', ')} WHERE user_id = $${paramIndex}`,
       values,
     );
+
+    const result = await this.db.query(`SELECT * FROM user_settings WHERE user_id = $1`, [userId]);
 
     return result.rows[0];
   }
@@ -178,7 +182,7 @@ export class UsersService {
     const result = await this.db.query(
       `SELECT id, username, nickname, avatar_url, bio
        FROM users
-       WHERE (username ILIKE $1 OR nickname ILIKE $1 OR email ILIKE $1)
+       WHERE (username LIKE $1 OR nickname LIKE $1 OR email LIKE $1)
          AND id != $2
          AND is_active = true
          AND status = 0

@@ -13,12 +13,12 @@ export class UploadsService {
     private configService: ConfigService,
     private db: DatabaseService,
   ) {
-    const endpoint = this.configService.get<string>('minio.endpoint');
-    const port = this.configService.get<number>('minio.port');
-    const accessKey = this.configService.get<string>('minio.accessKey');
-    const secretKey = this.configService.get<string>('minio.secretKey');
-    const useSSL = this.configService.get<boolean>('minio.useSSL');
-    this.bucketName = this.configService.get<string>('minio.bucket');
+    const endpoint = this.configService.get<string>('minio.endpoint') || 'localhost';
+    const port = this.configService.get<number>('minio.port') || 9000;
+    const accessKey = this.configService.get<string>('minio.accessKey') || 'minioadmin';
+    const secretKey = this.configService.get<string>('minio.secretKey') || 'minioadmin';
+    const useSSL = this.configService.get<boolean>('minio.useSSL') || false;
+    this.bucketName = this.configService.get<string>('minio.bucket') || 'chat-uploads';
 
     this.minioClient = new Client({
       endPoint: endpoint,
@@ -85,10 +85,9 @@ export class UploadsService {
     fileName: string,
     fileUrl: string,
   ) {
-    const result = await this.db.query(
+    await this.db.query(
       `INSERT INTO media_files (user_id, file_name, file_type, file_size, file_url, media_type)
-       VALUES ($1, $2, $3, $4, $5, $6)
-       RETURNING *`,
+       VALUES ($1, $2, $3, $4, $5, $6)`,
       [
         userId,
         file.originalname,
@@ -97,6 +96,13 @@ export class UploadsService {
         fileUrl,
         this.getMediaType(file.mimetype),
       ],
+    );
+
+    const result = await this.db.query(
+      `SELECT * FROM media_files
+       WHERE user_id = $1 AND file_name = $2
+       ORDER BY created_at DESC LIMIT 1`,
+      [userId, file.originalname],
     );
     return result.rows[0];
   }

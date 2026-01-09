@@ -1,0 +1,386 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { NotFoundException, BadRequestException, UnauthorizedException } from '@nestjs/common';
+import { UsersService } from '../../../../src/modules/users/services/users.service';
+import { DatabaseService } from '../../../../src/common/database/database.service';
+import * as bcrypt from 'bcrypt';
+
+describe('UsersService', () => {
+  let service: UsersService;
+  let mockDb: jest.Mocked<DatabaseService>;
+
+  beforeEach(async () => {
+    mockDb = {
+      query: jest.fn(),
+    } as any;
+
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        UsersService,
+        {
+          provide: DatabaseService,
+          useValue: mockDb,
+        },
+      ],
+    }).compile();
+
+    service = module.get<UsersService>(UsersService);
+
+    jest.clearAllMocks();
+  });
+
+  describe('getUserProfile', () => {
+    it('should return user profile successfully', async () => {
+      const userId = '1';
+      const mockProfile = {
+        id: userId,
+        username: 'testuser',
+        email: 'test@example.com',
+        nickname: 'Test User',
+        avatar_url: null,
+        bio: 'Test Bio',
+        gender: '1',
+        birth_date: '1990-01-01',
+        region: 'Beijing',
+        is_verified: false,
+        created_at: new Date(),
+      };
+
+      mockDb.query.mockResolvedValueOnce({
+        rows: [mockProfile],
+        rowCount: 1,
+      });
+
+      const result = await service.getUserProfile(userId);
+
+      expect(result).toEqual(mockProfile);
+      expect(mockDb.query).toHaveBeenCalledWith(
+        'SELECT id, username, email, nickname, avatar_url, bio, gender, birth_date, region, is_verified, created_at FROM users WHERE id = $1',
+        [userId],
+      );
+    });
+
+    it('should throw NotFoundException if user not found', async () => {
+      const userId = '999';
+
+      mockDb.query.mockResolvedValueOnce({ rows: [], rowCount: 0 });
+
+      await expect(service.getUserProfile(userId)).rejects.toThrow(NotFoundException);
+      expect(mockDb.query).toHaveBeenCalledWith(
+        'SELECT id, username, email, nickname, avatar_url, bio, gender, birth_date, region, is_verified, created_at FROM users WHERE id = $1',
+        [userId],
+      );
+    });
+  });
+
+  describe('updateUserProfile', () => {
+    it('should update user profile successfully', async () => {
+      const userId = '1';
+      const updateData = {
+        nickname: 'Updated Nickname',
+        bio: 'Updated Bio',
+      };
+
+      const mockProfile = {
+        id: userId,
+        username: 'testuser',
+        email: 'test@example.com',
+        nickname: 'Updated Nickname',
+        bio: 'Updated Bio',
+      };
+
+      mockDb.query.mockResolvedValueOnce({
+        rowCount: 1,
+      });
+
+      const result = await service.updateUserProfile(userId, updateData);
+
+      expect(result).toEqual(mockProfile);
+      expect(mockDb.query).toHaveBeenCalledWith(
+        'UPDATE users SET nickname = $1, bio = $2 WHERE id = $3 RETURNING id, username, email, nickname, bio, gender, birth_date, region, is_verified, updated_at',
+        [updateData.nickname, updateData.bio, userId],
+      );
+    });
+
+    it('should throw BadRequestException if no data to update', async () => {
+      const userId = '1';
+      const updateData = {};
+
+      await expect(service.updateUserProfile(userId, updateData)).rejects.toThrow(
+        '没有需要更新的字段',
+      );
+    });
+  });
+
+  describe('changePassword', () => {
+    it('should change password successfully', async () => {
+      const userId = '1';
+      const passwords = {
+        currentPassword: 'oldpassword',
+        newPassword: 'newpassword',
+      };
+
+      const mockUser = {
+        id: userId,
+        password_hash: 'oldhash',
+      };
+
+      mockDb.query
+        .mockResolvedValueOnce({ rows: [mockUser] })
+        .mockResolvedValueOnce({ rowCount: 1 })
+        .mockResolvedValueOnce({ rowCount: 0 });
+
+      (bcrypt.compare as jest.Mock).mockResolvedValueOnce(true);
+
+      const result = await service.changePassword(userId, passwords);
+
+      expect(result).toEqual({ message: '密码修改成功' });
+      expect(mockDb.query).toHaveBeenCalledTimes(2);
+      expect(bcrypt.compare).toHaveBeenCalledWith('oldpassword', 'oldhash');
+      expect(bcrypt.hash).toHaveBeenCalledWith('newpassword', 10);
+      expect(mockDb.query).toHaveBeenCalledWith(
+        'UPDATE users SET password_hash = $1 WHERE id = $2',
+        [expect.any(String), expect.any(String), userId],
+      );
+    });
+
+    it('should throw UnauthorizedException if current password is wrong', async () => {
+      const userId = '1';
+      const passwords = {
+        currentPassword: 'wrongpassword',
+        newPassword: 'newpassword',
+      };
+
+      const mockUser = {
+        id: userId,
+        password_hash: 'oldhash',
+      };
+
+      mockDb.query
+        .mockResolvedValueOnce({ rows: [mockUser] })
+        .mockResolvedValueOnce({ rowCount: 1 });
+
+      (bcrypt.compare as jest.Mock).mockResolvedValueOnce(false);
+
+      await expect(service.changePassword(userId, passwords)).rejects.toThrow('当前密码不正确');
+    });
+
+    it('should throw NotFoundException if user not found', async () => {
+      const userId = '999';
+      const passwords = {
+        currentPassword: 'oldpassword',
+        newPassword: 'newpassword',
+      };
+
+      mockDb.query.mockResolvedValueOnce({ rows: [] });
+
+      (bcrypt.compare as jest.Mock).mockResolvedValueOnce(true);
+
+      await expect(service.changePassword(userId, passwords)).rejects.toThrow(NotFoundException);
+      expect(mockDb.query).toHaveBeenCalledWith('SELECT password_hash FROM users WHERE id = $1', [
+        userId,
+      ]);
+    });
+  });
+
+  describe('uploadAvatar', () => {
+    it('should upload avatar successfully', async () => {
+      const userId = '1';
+      const avatarUrl = 'http://example.com/avatar.jpg';
+
+      const mockUser = {
+        id: userId,
+        avatar_url: 'http://example.com/avatar.jpg',
+      };
+
+      mockDb.query.mockResolvedValueOnce({ rows: [mockUser], rowCount: 1 });
+
+      const result = await service.uploadAvatar(userId, avatarUrl);
+
+      expect(result).toEqual(mockUser);
+      expect(mockDb.query).toHaveBeenCalledWith(
+        'UPDATE users SET avatar_url = $1 WHERE id = $2 RETURNING id, username, email, nickname, avatar_url, bio, gender, birth_date, region, is_verified, updated_at',
+        [avatarUrl, userId],
+      );
+    });
+
+    it('should throw NotFoundException if user not found', async () => {
+      const userId = '999';
+      const avatarUrl = 'http://example.com/avatar.jpg';
+
+      mockDb.query.mockResolvedValueOnce({ rows: [] });
+
+      await expect(service.uploadAvatar(userId, avatarUrl)).rejects.toThrow(NotFoundException);
+      expect(mockDb.query).toHaveBeenCalledWith(
+        'UPDATE users SET avatar_url = $1 WHERE id = $2 RETURNING id, username, email, nickname, avatar_url, bio, gender, birth_date, region, is_verified, updated_at',
+        [avatarUrl, userId],
+      );
+    });
+  });
+
+  describe('getUserSettings', () => {
+    it('should get user settings successfully', async () => {
+      const userId = '1';
+      const mockSettings = {
+        privacy_profile_visible: 0,
+        notification_message: true,
+        language: 'zh-CN',
+      };
+
+      mockDb.query.mockResolvedValueOnce({
+        rows: [mockSettings],
+        rowCount: 1,
+      });
+
+      const result = await service.getUserSettings(userId);
+
+      expect(result).toEqual(mockSettings);
+      expect(mockDb.query).toHaveBeenCalledWith('SELECT * FROM user_settings WHERE user_id = $1', [
+        userId,
+      ]);
+    });
+
+    it('should create default settings if not exist', async () => {
+      const userId = '1';
+
+      mockDb.query.mockResolvedValueOnce({ rows: [] }).mockResolvedValueOnce({ rowCount: 0 });
+
+      mockDb.query.mockResolvedValueOnce({
+        rows: [],
+        rowCount: 0,
+      });
+
+      const result = await service.getUserSettings(userId);
+
+      expect(result).toHaveProperty('privacy_profile_visible', 0);
+      expect(mockDb.query).toHaveBeenCalledWith('SELECT * FROM user_settings WHERE user_id = $1', [
+        userId,
+      ]);
+      expect(mockDb.query).toHaveBeenCalledWith(
+        'INSERT INTO user_settings (user_id) VALUES ($1))',
+        [userId],
+      );
+    });
+  });
+
+  describe('updateUserSettings', () => {
+    it('should update user settings successfully', async () => {
+      const userId = '1';
+      const settingsData = {
+        privacy_profile_visible: 1,
+        notification_message: false,
+        language: 'en-US',
+      };
+
+      const mockSettings = {
+        privacy_profile_visible: 0,
+        notification_message: true,
+        language: 'zh-CN',
+      };
+
+      mockDb.query.mockResolvedValueOnce({
+        rows: [mockSettings],
+        rowCount: 1,
+      });
+
+      const result = await service.updateUserSettings(userId, settingsData);
+
+      expect(result).toEqual(settingsData);
+      expect(mockDb.query).toHaveBeenCalledWith(
+        'UPDATE user_settings SET privacy_profile_visible = $1, notification_message = $2, language = $3 WHERE user_id = $4 RETURNING *',
+        [
+          settingsData.privacy_profile_visible,
+          settingsData.notification_message,
+          settingsData.language,
+          userId,
+        ],
+      );
+    });
+
+    it('should throw BadRequestException if no fields to update', async () => {
+      const userId = '1';
+      const settingsData = {};
+
+      await expect(service.updateUserSettings(userId, settingsData)).rejects.toThrow(
+        '没有需要更新的字段',
+      );
+    });
+  });
+
+  describe('searchUsers', () => {
+    it('should search users successfully', async () => {
+      const keyword = 'test';
+      const currentUserId = '1';
+      const limit = 20;
+
+      const mockUsers = [
+        { id: '1', username: 'testuser' },
+        { id: '2', username: 'testuser2' },
+      ];
+
+      mockDb.query.mockResolvedValueOnce({
+        rows: mockUsers,
+        rowCount: 2,
+      });
+
+      const result = await service.searchUsers(keyword, currentUserId, { page: 1, limit });
+
+      expect(result).toEqual(mockUsers);
+      expect(mockDb.query).toHaveBeenCalledWith(
+      );
+    });
+
+    it('should return empty array if no users found', async () => {
+      const keyword = 'nonexistent';
+      const currentUserId = '1';
+
+      mockDb.query.mockResolvedValueOnce({ rows: [], rowCount: 0 });
+
+      const result = await service.searchUsers(keyword, currentUserId, { page: 1, limit: 10 });
+
+      expect(result).toEqual([]);
+      expect(mockDb.query).toHaveBeenCalledWith(
+        expect.stringContaining('SELECT id, username, nickname, avatar_url, bio FROM users'),
+      );
+    });
+  });
+
+  describe('getUserById', () => {
+    it('should get user by id successfully', async () => {
+      const userId = '1';
+
+      const mockUser = {
+        id: userId,
+        username: 'testuser',
+        is_active: true,
+        status: 0,
+      };
+
+      mockDb.query.mockResolvedValueOnce({
+        rows: [mockUser],
+        rowCount: 1,
+      });
+
+      const result = await service.getUserById(userId);
+
+      expect(result).toEqual(mockUser);
+      expect(mockDb.query).toHaveBeenCalledWith(
+        'SELECT id, username, nickname, avatar_url, bio, gender, region FROM users' +
+          ' WHERE id = $1 AND is_active = true AND status = 0',
+        [userId],
+      );
+    });
+
+    it('should throw NotFoundException if user not found', async () => {
+      const userId = '999';
+
+      mockDb.query.mockResolvedValueOnce({ rows: [], rowCount: 0 });
+
+      await expect(service.getUserById(userId)).rejects.toThrow(NotFoundException);
+      expect(mockDb.query).toHaveBeenCalledWith(
+        'SELECT id, username, nickname, avatar_url, bio, gender, region FROM users' +
+          ' WHERE id = $1 AND is_active = true AND status = 0',
+        [userId],
+      );
+    });
+  });
+});

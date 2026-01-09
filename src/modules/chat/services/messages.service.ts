@@ -42,11 +42,17 @@ export class MessagesService {
       }
     }
 
-    const result = await this.db.query(
+    await this.db.query(
       `INSERT INTO messages (conversation_id, sender_id, type, content, media_urls, reply_to_id, created_at)
-       VALUES ($1, $2, $3, $4, $5, $6, NOW())
-       RETURNING *`,
+       VALUES ($1, $2, $3, $4, $5, $6, NOW())`,
       [conversationId, senderId, type || 0, content || '', media_urls || [], reply_to_id || null],
+    );
+
+    const result = await this.db.query(
+      `SELECT * FROM messages
+       WHERE conversation_id = $1 AND sender_id = $2
+       ORDER BY created_at DESC LIMIT 1`,
+      [conversationId, senderId],
     );
 
     const message = result.rows[0];

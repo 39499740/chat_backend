@@ -1,0 +1,90 @@
+
+> chat-backend@1.0.0 test:cov
+> jest --coverage --testPathIgnorePatterns=chat.gateway.spec.ts
+
+---------------------------------------|---------|----------|---------|---------|----------------------------------------------------------------------
+File                                   | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s                                                    
+---------------------------------------|---------|----------|---------|---------|----------------------------------------------------------------------
+All files                              |   75.47 |    67.52 |   77.33 |    75.6 |                                                                      
+ src                                   |       0 |        0 |       0 |       0 |                                                                      
+  app.controller.ts                    |       0 |      100 |       0 |       0 | 1-19                                                                 
+  app.service.ts                       |       0 |        0 |       0 |       0 | 1-10                                                                 
+ src/common/database                   |   21.42 |      100 |       0 |   15.38 |                                                                      
+  database.service.ts                  |   21.42 |      100 |       0 |   15.38 | 9-57                                                                 
+ src/common/decorators                 |     100 |       50 |     100 |     100 |                                                                      
+  current-user.decorator.ts            |     100 |       50 |     100 |     100 | 8                                                                    
+ src/common/interfaces                 |       0 |        0 |       0 |       0 |                                                                      
+  gateway.interfaces.ts                |       0 |        0 |       0 |       0 | 1-7                                                                  
+ src/common/services                   |   57.44 |    66.66 |   88.23 |   55.55 |                                                                      
+  redis.service.ts                     |   57.44 |    66.66 |   88.23 |   55.55 | 33-34,38-39,44-45,51-53,61,66-69,75,80,85,90,95,100,105              
+ src/config                            |       0 |        0 |       0 |       0 |                                                                      
+  configuration.ts                     |       0 |        0 |       0 |       0 | 1-54                                                                 
+ src/modules/auth                      |       0 |      100 |     100 |       0 |                                                                      
+  index.ts                             |       0 |      100 |     100 |       0 | 1-10                                                                 
+ src/modules/auth/controllers          |     100 |      100 |     100 |     100 |                                                                      
+  auth.controller.ts                   |     100 |      100 |     100 |     100 |                                                                      
+ src/modules/auth/dto                  |       0 |        0 |       0 |       0 |                                                                      
+  token-type.enum.ts                   |       0 |        0 |       0 |       0 | 1-3                                                                  
+ src/modules/auth/services             |     100 |    94.73 |     100 |     100 |                                                                      
+  auth.service.ts                      |     100 |    94.73 |     100 |     100 | 48                                                                   
+ src/modules/auth/strategies           |     100 |      100 |     100 |     100 |                                                                      
+  jwt.strategy.ts                      |     100 |      100 |     100 |     100 |                                                                      
+ src/modules/chat                      |       0 |      100 |     100 |       0 |                                                                      
+  index.ts                             |       0 |      100 |     100 |       0 | 1-3                                                                  
+ src/modules/chat/controllers          |     100 |      100 |     100 |     100 |                                                                      
+  messages.controller.ts               |     100 |      100 |     100 |     100 |                                                                      
+ src/modules/chat/services             |   94.88 |    94.02 |   97.82 |   94.75 |                                                                      
+  group-chat-notification.service.ts   |     100 |      100 |     100 |     100 |                                                                      
+  media-message.service.ts             |   88.77 |    86.88 |     100 |   88.54 | 112,135,154,170,189,215,221,227,233,239,324                          
+  messages.service.ts                  |     100 |      100 |     100 |     100 |                                                                      
+  offline-message.service.ts           |   94.25 |      100 |   92.85 |   94.11 | 126,178-179,243-244                                                  
+ src/modules/conversations             |       0 |      100 |     100 |       0 |                                                                      
+  index.ts                             |       0 |      100 |     100 |       0 | 1-5                                                                  
+ src/modules/conversations/controllers |     100 |      100 |     100 |     100 |                                                                      
+  conversations.controller.ts          |     100 |      100 |     100 |     100 |                                                                      
+ src/modules/conversations/services    |   81.44 |    53.84 |     100 |   81.05 |                                                                      
+  conversations.service.ts             |   81.44 |    53.84 |     100 |   81.05 | 63,72,76,238-239,243,273,287-296,308,319,344,355-368                 
+ src/modules/friends                   |       0 |      100 |     100 |       0 |                                                                      
+  index.ts                             |       0 |      100 |     100 |       0 | 1-5                                                                  
+ src/modules/friends/controllers       |     100 |      100 |     100 |     100 |                                                                      
+  friends.controller.ts                |     100 |      100 |     100 |     100 |                                                                      
+ src/modules/friends/services          |     100 |      100 |     100 |     100 |                                                                      
+  friends.service.ts                   |     100 |      100 |     100 |     100 |                                                                      
+ src/modules/moments                   |       0 |      100 |     100 |       0 |                                                                      
+  index.ts                             |       0 |      100 |     100 |       0 | 1-5                                                                  
+ src/modules/moments/controllers       |     100 |      100 |     100 |     100 |                                                                      
+  moments.controller.ts                |     100 |      100 |     100 |     100 |                                                                      
+ src/modules/moments/services          |     100 |    96.96 |     100 |     100 |                                                                      
+  moments.service.ts                   |     100 |    96.96 |     100 |     100 | 26                                                                   
+ src/modules/notifications             |       0 |      100 |     100 |       0 |                                                                      
+  index.ts                             |       0 |      100 |     100 |       0 | 1-4                                                                  
+ src/modules/notifications/controllers |     100 |      100 |     100 |     100 |                                                                      
+  notifications.controller.ts          |     100 |      100 |     100 |     100 |                                                                      
+ src/modules/notifications/services    |   32.74 |       10 |   16.66 |   31.53 |                                                                      
+  notification.service.ts              |   32.74 |       10 |   16.66 |   31.53 | 47-96,119-120,124,151-239,255-480                                    
+ src/modules/search                    |       0 |      100 |     100 |       0 |                                                                      
+  index.ts                             |       0 |      100 |     100 |       0 | 1-4                                                                  
+ src/modules/search/controllers        |     100 |      100 |     100 |     100 |                                                                      
+  search.controller.ts                 |     100 |      100 |     100 |     100 |                                                                      
+ src/modules/search/services           |   98.07 |    94.59 |     100 |      98 |                                                                      
+  search.service.ts                    |   98.07 |    94.59 |     100 |      98 | 48                                                                   
+ src/modules/uploads                   |       0 |      100 |     100 |       0 |                                                                      
+  index.ts                             |       0 |      100 |     100 |       0 | 1-2                                                                  
+ src/modules/uploads/controllers       |   91.66 |      100 |     100 |    90.9 |                                                                      
+  uploads.controller.ts                |   91.66 |      100 |     100 |    90.9 | 36,49                                                                
+ src/modules/uploads/services          |     100 |      100 |     100 |     100 |                                                                      
+  uploads.service.ts                   |     100 |      100 |     100 |     100 |                                                                      
+ src/modules/users                     |       0 |      100 |     100 |       0 |                                                                      
+  index.ts                             |       0 |      100 |     100 |       0 | 1-5                                                                  
+ src/modules/users/controllers         |   96.66 |      100 |     100 |   96.42 |                                                                      
+  users.controller.ts                  |   96.66 |      100 |     100 |   96.42 | 79                                                                   
+ src/modules/users/services            |   58.66 |    33.33 |   66.66 |   57.53 |                                                                      
+  users.service.ts                     |   58.66 |    33.33 |   66.66 |   57.53 | 44-45,49-50,54-55,71,84,92,108-174                                   
+ src/modules/websocket                 |   14.42 |        0 |       0 |   13.97 |                                                                      
+  chat.gateway.ts                      |      15 |        0 |       0 |    14.6 | 26-83,90-105,113-125,133-148,153-163,168-178,183-219,226-231,240-256 
+  index.ts                             |       0 |      100 |     100 |       0 | 1-4                                                                  
+ src/modules/websocket/controllers     |   96.15 |      100 |    87.5 |   95.83 |                                                                      
+  webrtc.controller.ts                 |   96.15 |      100 |    87.5 |   95.83 | 89                                                                   
+ src/modules/websocket/services        |   91.66 |    86.79 |   84.61 |   91.52 |                                                                      
+  webrtc.service.ts                    |   91.66 |    86.79 |   84.61 |   91.52 | 145,261,359-360,399-400,414-431                                      
+---------------------------------------|---------|----------|---------|---------|----------------------------------------------------------------------

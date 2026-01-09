@@ -3,6 +3,7 @@ import { UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { DatabaseService } from '../../../common/database/database.service';
 import * as bcrypt from 'bcrypt';
+import { v4 as uuidv4 } from 'uuid';
 
 interface RegisterData {
   username: string;
@@ -29,7 +30,7 @@ export class AuthService {
 
     // 检查用户名或邮箱是否已存在
     const existingUser = await this.db.query(
-      'SELECT id FROM users WHERE username = $1 OR email = $2',
+      'SELECT id FROM users WHERE username = ? OR email = ?',
       [username, email],
     );
 
@@ -41,11 +42,18 @@ export class AuthService {
     const passwordHash = await bcrypt.hash(password, 10);
 
     // 创建用户
+    const userId = uuidv4();
+    await this.db.query(
+      `INSERT INTO users (id, username, email, password_hash, nickname, phone, is_active)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [userId, username, email, passwordHash, nickname || username, phone, true],
+    );
+
     const result = await this.db.query(
-      `INSERT INTO users (username, email, password_hash, nickname, phone, is_active)
-       VALUES ($1, $2, $3, $4, $5, $6)
-       RETURNING id, username, email, nickname, avatar_url, created_at`,
-      [username, email, passwordHash, nickname || username, phone, true],
+      `SELECT id, username, email, nickname, avatar_url, created_at FROM users
+       WHERE username = ? OR email = ?
+       ORDER BY created_at DESC LIMIT 1`,
+      [username, email],
     );
 
     const user = result.rows[0];
@@ -65,9 +73,9 @@ export class AuthService {
     // 查询用户（支持用户名、邮箱、手机号登录）
     const result = await this.db.query(
       `SELECT id, username, email, password_hash, status, is_active FROM users
-       WHERE (username = $1 OR email = $1 OR phone = $1)
+       WHERE (username = ? OR email = ? OR phone = ?)
          AND status = 0`,
-      [account],
+      [account, account, account],
     );
 
     if (result.rows.length === 0) {
@@ -106,7 +114,7 @@ export class AuthService {
 
   async validateUser(userId: string) {
     const result = await this.db.query(
-      'SELECT id, username, email, status, is_active FROM users WHERE id = $1',
+      'SELECT id, username, email, status, is_active FROM users WHERE id = ?',
       [userId],
     );
 
@@ -173,7 +181,7 @@ export class AuthService {
     // await this.redis.set(`blacklist:${token}`, '1', 'EX', expiration);
 
     // 更新用户状态为离线
-    await this.db.query('UPDATE user_sessions SET last_accessed_at = NOW() WHERE user_id = $1', [
+    await this.db.query('UPDATE user_sessions SET last_accessed_at = NOW() WHERE user_id = ?', [
       userId,
     ]);
   }

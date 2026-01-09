@@ -12,11 +12,17 @@ export class MomentsService {
       throw new BadRequestException('动态内容不能为空');
     }
 
-    const result = await this.db.query(
+    await this.db.query(
       `INSERT INTO posts (user_id, content, media_urls, location, visibility, is_deleted, like_count, comment_count)
-       VALUES ($1, $2, $3, $4, $5, $6, 0, 0)
-       RETURNING *`,
+       VALUES ($1, $2, $3, $4, $5, $6, 0, 0)`,
       [userId, content, media_urls || [], location, visibility || 0, false],
+    );
+
+    const result = await this.db.query(
+      `SELECT * FROM posts
+       WHERE user_id = $1 AND content = $2
+       ORDER BY created_at DESC LIMIT 1`,
+      [userId, content],
     );
 
     return result.rows[0];
@@ -206,11 +212,17 @@ export class MomentsService {
       throw new BadRequestException('评论内容不能为空');
     }
 
-    const result = await this.db.query(
+    await this.db.query(
       `INSERT INTO comments (post_id, user_id, content, parent_id, is_deleted, like_count)
-       VALUES ($1, $2, $3, $4, $5, 0)
-       RETURNING *`,
+       VALUES ($1, $2, $3, $4, $5, 0)`,
       [postId, userId, content, parent_id || null, false],
+    );
+
+    const result = await this.db.query(
+      `SELECT * FROM comments
+       WHERE post_id = $1 AND user_id = $2 AND content = $3
+       ORDER BY created_at DESC LIMIT 1`,
+      [postId, userId, content],
     );
 
     // 增加评论数

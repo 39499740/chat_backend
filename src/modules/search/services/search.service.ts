@@ -88,14 +88,14 @@ export class SearchService {
        FROM users
        WHERE is_active = TRUE
          AND (
-           username ILIKE $1
-           OR nickname ILIKE $1
+           username LIKE $1
+           OR nickname LIKE $1
          )
          AND id != $2
        ORDER BY
          CASE
-           WHEN username ILIKE $1 THEN 1
-           WHEN nickname ILIKE $1 THEN 2
+           WHEN username LIKE $1 THEN 1
+           WHEN nickname LIKE $1 THEN 2
            ELSE 3
          END,
          username
@@ -109,8 +109,8 @@ export class SearchService {
        FROM users
        WHERE is_active = TRUE
          AND (
-           username ILIKE $1
-           OR nickname ILIKE $1
+           username LIKE $1
+           OR nickname LIKE $1
          )
          AND id != $2`,
       [query, userId],
@@ -161,7 +161,7 @@ export class SearchService {
            )  -- 好友的帖子
          )
          AND (
-           p.content ILIKE $1
+           p.content LIKE $1
          )
        ORDER BY p.created_at DESC
        LIMIT $3 OFFSET $4`,
@@ -183,7 +183,7 @@ export class SearchService {
                AND status = 0
            )
          )
-         AND p.content ILIKE $1`,
+         AND p.content LIKE $1`,
       [query, userId],
     );
 
@@ -222,7 +222,7 @@ export class SearchService {
        WHERE cm.user_id = $2
          AND m.is_deleted = FALSE
          AND m.type = 0  -- 只搜索文本消息
-         AND m.content ILIKE $1
+         AND m.content LIKE $1
        ORDER BY m.created_at DESC
        LIMIT $3 OFFSET $4`,
       [query, userId, limit, offset],
@@ -236,7 +236,7 @@ export class SearchService {
        WHERE cm.user_id = $2
          AND m.is_deleted = FALSE
          AND m.type = 0
-         AND m.content ILIKE $1`,
+         AND m.content LIKE $1`,
       [query, userId],
     );
 
@@ -275,12 +275,12 @@ export class SearchService {
        LEFT JOIN messages m ON c.id = m.conversation_id
        WHERE cm.user_id = $1
          AND (
-           c.name ILIKE $2
+           c.name LIKE $2
            OR EXISTS (
              SELECT 1 FROM messages m2
              WHERE m2.conversation_id = c.id
                AND m2.type = 0
-               AND m2.content ILIKE $2
+               AND m2.content LIKE $2
            )
          )
        ORDER BY c.updated_at DESC
@@ -295,12 +295,12 @@ export class SearchService {
        JOIN conversation_members cm ON c.id = cm.conversation_id
        WHERE cm.user_id = $1
          AND (
-           c.name ILIKE $2
+           c.name LIKE $2
            OR EXISTS (
              SELECT 1 FROM messages m
              WHERE m.conversation_id = c.id
                AND m.type = 0
-               AND m.content ILIKE $2
+               AND m.content LIKE $2
            )
          )`,
       [userId, query],
@@ -339,8 +339,8 @@ export class SearchService {
        WHERE is_active = TRUE
          AND id != $1
          AND (
-           username ILIKE $2
-           OR nickname ILIKE $2
+           username LIKE $2
+           OR nickname LIKE $2
          )
        LIMIT $3`,
       [userId, searchQuery, limit],

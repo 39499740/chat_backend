@@ -1,0 +1,372 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { ConversationsService } from '@/modules/conversations/services/conversations.service';
+import { DatabaseService } from '@/common/database/database.service';
+import { GroupChatNotificationService } from '@/modules/chat/services/group-chat-notification.service';
+import { NotFoundException, BadRequestException } from '@nestjs/common';
+
+describe('ConversationsService', () => {
+  let service: ConversationsService;
+  let mockDb: jest.Mocked<DatabaseService>;
+  let mockGroupNotificationService: jest.Mocked<GroupChatNotificationService>;
+
+  beforeEach(async () => {
+    mockDb = {
+      query: jest.fn(),
+    } as any;
+
+    mockGroupNotificationService = {
+      notifyMemberAdded: jest.fn(),
+      notifyMemberRemoved: jest.fn(),
+      notifyGroupUpdated: jest.fn(),
+    } as any;
+
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        ConversationsService,
+        {
+          provide: DatabaseService,
+          useValue: mockDb,
+        },
+        {
+          provide: GroupChatNotificationService,
+          useValue: mockGroupNotificationService,
+        },
+      ],
+    }).compile();
+
+    service = module.get<ConversationsService>(ConversationsService);
+
+    jest.clearAllMocks();
+  });
+
+  describe('createConversation', () => {
+    it('should create a direct conversation successfully', async () => {
+      const userId = 'user-1';
+      const createData = {
+        type: 0,
+        friendId: 'user-2',
+      };
+
+      mockDb.query
+        .mockResolvedValueOnce({ rows: [{ id: '1' }], rowCount: 1 })
+        .mockResolvedValueOnce({ rows: [], rowCount: 0 })
+        .mockResolvedValueOnce({ rows: [], rowCount: 0 });
+
+      const result = await service.createConversation(userId, createData);
+
+      expect(result).toBeDefined();
+      expect(mockDb.query).toHaveBeenCalledTimes(3);
+    });
+
+    it('should return existing conversation if it already exists', async () => {
+      const userId = 'user-1';
+      const createData = {
+        type: 0,
+        friendId: 'user-2',
+      };
+
+      mockDb.query
+        .mockResolvedValueOnce({ rows: [{ id: '1' }], rowCount: 1 })
+        .mockResolvedValueOnce({ rows: [{ id: 'existing-conv' }], rowCount: 1 });
+
+      const result = await service.createConversation(userId, createData);
+
+      expect(result).toBeDefined();
+    });
+
+    it('should throw BadRequestException if friendId not provided for direct chat', async () => {
+      const userId = 'user-1';
+      const createData = {
+        type: 0,
+      };
+
+      await expect(service.createConversation(userId, createData)).rejects.toThrow(
+        '单聊需要指定好友ID',
+      );
+    });
+
+    it('should throw BadRequestException if users are not friends', async () => {
+      const userId = 'user-1';
+      const createData = {
+        type: 0,
+        friendId: 'user-2',
+      };
+
+      mockDb.query.mockResolvedValueOnce({ rows: [], rowCount: 0 });
+
+      await expect(service.createConversation(userId, createData)).rejects.toThrow(
+        '对方不是你的好友',
+      );
+    });
+
+    it('should create a group conversation successfully', async () => {
+      const userId = 'user-1';
+      const createData = {
+        type: 1,
+        name: 'Test Group',
+        memberIds: ['user-2', 'user-3'],
+      };
+
+      mockDb.query.mockResolvedValueOnce({ rows: [{ id: '1' }], rowCount: 1 });
+
+      const result = await service.createConversation(userId, createData);
+
+      expect(result).toBeDefined();
+      expect(mockGroupNotificationService.notifyMemberAdded).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('getConversations', () => {
+    it('should get conversations with pagination', async () => {
+      const userId = 'user-1';
+      const query = { page: 1, limit: 20 };
+
+      const mockConversations = [
+        { id: 'conv-1', type: 0, name: 'Direct Chat' },
+        { id: 'conv-2', type: 1, name: 'Group Chat' },
+      ];
+
+      mockDb.query
+        .mockResolvedValueOnce({ rows: mockConversations })
+        .mockResolvedValueOnce({ rows: [{ total: 2 }] });
+
+      const result = await service.getConversations(userId, query);
+
+      expect(result.conversations).toEqual(mockConversations);
+      expect(result.total).toBe(2);
+      expect(result.page).toBe(1);
+      expect(result.limit).toBe(20);
+    });
+
+    it('should filter conversations by type', async () => {
+      const userId = 'user-1';
+      const query = { page: 1, limit: 20, type: 0 };
+
+      mockDb.query
+        .mockResolvedValueOnce({ rows: [] })
+        .mockResolvedValueOnce({ rows: [{ total: 0 }] });
+
+      const result = await service.getConversations(userId, query);
+
+      expect(result.conversations).toEqual([]);
+      expect(result.total).toBe(0);
+    });
+  });
+
+  describe('getConversationDetail', () => {
+    it('should get conversation detail successfully', async () => {
+      const conversationId = 'conv-1';
+      const userId = 'user-1';
+
+      const mockMembers = [
+        {
+          id: 'user-1',
+          username: 'user1',
+          nickname: 'User 1',
+          avatar_url: 'avatar1.jpg',
+          role: 0,
+          last_read_at: new Date(),
+        },
+      ];
+
+      mockDb.query
+        .mockResolvedValueOnce({ rows: [{ id: 'conv-1' }] })
+        .mockResolvedValueOnce({ rows: [] })
+        .mockResolvedValueOnce({ rows: mockMembers });
+
+      const result = await service.getConversationDetail(conversationId, userId);
+
+      expect(result).toBeDefined();
+      expect(result.id).toBe('conv-1');
+      expect(result.members).toBeDefined();
+    });
+
+    it('should throw NotFoundException if user not in conversation', async () => {
+      const conversationId = 'conv-1';
+      const userId = 'user-1';
+
+      mockDb.query.mockResolvedValueOnce({ rows: [] });
+
+      await expect(service.getConversationDetail(conversationId, userId)).rejects.toThrow(
+        '不是会话成员',
+      );
+    });
+  });
+
+  describe('updateConversation', () => {
+    it('should update conversation successfully', async () => {
+      const conversationId = 'conv-1';
+      const currentUserId = 'user-1';
+      const updateData = { name: 'Updated Group Name' };
+
+      mockDb.query
+        .mockResolvedValueOnce({ rows: [{ id: 'conv-1', role: 0 }] })
+        .mockResolvedValueOnce({ rows: [], rowCount: 0 });
+
+      const result = await service.updateConversation(conversationId, currentUserId, updateData);
+
+      expect(result).toBeDefined();
+    });
+
+    it('should throw BadRequestException if user is not admin', async () => {
+      const conversationId = 'conv-1';
+      const currentUserId = 'user-1';
+      const updateData = { name: 'Updated Name' };
+
+      mockDb.query.mockResolvedValueOnce({
+        rows: [{ id: 'conv-1', role: 1 }],
+      });
+
+      await expect(
+        service.updateConversation(conversationId, currentUserId, updateData),
+      ).rejects.toThrow('仅群主可以修改会话');
+    });
+
+    it('should throw NotFoundException if user not in conversation', async () => {
+      const conversationId = 'conv-1';
+      const currentUserId = 'user-1';
+      const updateData = { name: 'Updated Name' };
+
+      mockDb.query.mockResolvedValueOnce({ rows: [] });
+
+      await expect(
+        service.updateConversation(conversationId, currentUserId, updateData),
+      ).rejects.toThrow('仅群主可以修改会话');
+    });
+  });
+
+  describe('leaveConversation', () => {
+    it('should leave conversation successfully', async () => {
+      const conversationId = 'conv-1';
+      const userId = 'user-1';
+
+      mockDb.query
+        .mockResolvedValueOnce({ rows: [{ id: 'conv-1', type: 1 }] })
+        .mockResolvedValueOnce({ rows: [], rowCount: 0 });
+
+      const result = await service.leaveConversation(conversationId, userId);
+
+      expect(result).toBeDefined();
+    });
+
+    it('should throw BadRequestException if trying to leave direct chat', async () => {
+      const conversationId = 'conv-1';
+      const userId = 'user-1';
+
+      mockDb.query.mockResolvedValueOnce({
+        rows: [{ id: 'conv-1', type: 0 }],
+      });
+
+      await expect(service.leaveConversation(conversationId, userId)).rejects.toThrow(
+        '不能退出单聊',
+      );
+    });
+  });
+
+  describe('addMember', () => {
+    it('should add member successfully', async () => {
+      const conversationId = 'conv-1';
+      const userId = 'user-1';
+      const memberUserId = 'user-2';
+
+      mockDb.query
+        .mockResolvedValueOnce({ rows: [{ id: 'conv-1', role: 0 }] })
+        .mockResolvedValueOnce({ rows: [], rowCount: 0 })
+        .mockResolvedValueOnce({ rows: [], rowCount: 0 });
+
+      const result = await service.addMember(conversationId, userId, memberUserId);
+
+      expect(result).toBeDefined();
+      expect(mockGroupNotificationService.notifyMemberAdded).toHaveBeenCalled();
+    });
+
+    it('should throw BadRequestException if user not admin', async () => {
+      const conversationId = 'conv-1';
+      const userId = 'user-1';
+      const memberUserId = 'user-2';
+
+      mockDb.query.mockResolvedValueOnce({
+        rows: [{ id: 'conv-1', role: 1 }],
+      });
+
+      await expect(service.addMember(conversationId, userId, memberUserId)).rejects.toThrow(
+        '只有管理员可以添加成员',
+      );
+    });
+  });
+
+  describe('removeMember', () => {
+    it('should remove member successfully', async () => {
+      const conversationId = 'conv-1';
+      const userId = 'user-1';
+      const memberUserId = 'user-2';
+
+      mockDb.query
+        .mockResolvedValueOnce({ rows: [{ id: 'conv-1', role: 0 }] })
+        .mockResolvedValueOnce({ rows: [] })
+        .mockResolvedValueOnce({ rows: [{ count: 1 }] });
+
+      const result = await service.removeMember(conversationId, userId, memberUserId);
+
+      expect(result).toBeDefined();
+      expect(mockGroupNotificationService.notifyMemberRemoved).toHaveBeenCalled();
+    });
+
+    it('should throw BadRequestException if trying to remove group owner', async () => {
+      const conversationId = 'conv-1';
+      const userId = 'user-1';
+      const memberUserId = 'user-2';
+
+      mockDb.query
+        .mockResolvedValueOnce({
+          rows: [{ id: 'conv-1', role: 2 }],
+        })
+        .mockResolvedValueOnce({ rows: [] })
+        .mockResolvedValueOnce({ rows: [] });
+
+      await expect(
+        service.removeMember(conversationId, userId, memberUserId),
+      ).rejects.toThrow('不能移除群主');
+    });
+
+      await expect(service.removeMember(conversationId, userId, memberUserId)).rejects.toThrow(
+        '不能移除群主',
+      );
+    });
+
+    it('should throw BadRequestException if user not admin', async () => {
+      const conversationId = 'conv-1';
+      const userId = 'user-1';
+      const memberUserId = 'user-2';
+
+      mockDb.query
+        .mockResolvedValueOnce({
+          rows: [{ id: 'conv-1', role: 1 }],
+        })
+        .mockResolvedValueOnce({ rows: [] })
+        .mockResolvedValueOnce({ rows: [] });
+
+      await expect(
+        service.removeMember(conversationId, userId, memberUserId),
+      ).rejects.toThrow('只有管理员可以移除成员');
+    });
+
+      await expect(service.removeMember(conversationId, userId, memberUserId)).rejects.toThrow(
+        '只有管理员可以移除成员',
+      );
+    });
+  });
+
+  describe('updateLastReadAt', () => {
+    it('should update last read at timestamp', async () => {
+      const conversationId = 'conv-1';
+      const userId = 'user-1';
+
+      mockDb.query.mockResolvedValueOnce({ rowCount: 1 });
+
+      await service.updateLastReadAt(conversationId, userId);
+
+      expect(mockDb.query).toHaveBeenCalledWith(expect.any(String), [conversationId, userId]);
+    });
+  });
+});

@@ -1,0 +1,11 @@
+{
+  "preset": "ts-jest",
+  "testEnvironment": "node",
+  "testMatch": ["**/test/**/*.e2e.ts"],
+  "roots": ["./test"],
+  "testTimeout": 60000,
+  "transformIgnorePatterns": ["node_modules/(?!(uuid|minio|mysql2|redis|ioredis|@nestjs))"],
+  "moduleNameMapper": {
+    "^uuid$": "uuid"
+  }
+}

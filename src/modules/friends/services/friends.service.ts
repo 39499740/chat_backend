@@ -47,10 +47,16 @@ export class FriendsService {
     }
 
     // 创建好友请求
-    const result = await this.db.query(
+    await this.db.query(
       `INSERT INTO friend_requests (requester_id, receiver_id, message)
-       VALUES ($1, $2, $3)
-       RETURNING *`,
+       VALUES ($1, $2, $3)`,
+      [userId, friendId, message],
+    );
+
+    const result = await this.db.query(
+      `SELECT * FROM friend_requests
+       WHERE requester_id = $1 AND receiver_id = $2 AND message = $3
+       ORDER BY created_at DESC LIMIT 1`,
       [userId, friendId, message],
     );
 
@@ -104,18 +110,24 @@ export class FriendsService {
   }
 
   async deleteFriend(userId: string, friendId: string) {
-    // 删除好友关系
-    const result = await this.db.query(
-      `DELETE FROM friendships
+    const friendResult = await this.db.query(
+      `SELECT * FROM friendships
        WHERE (user_a_id = $1 AND user_b_id = $2)
-          OR (user_a_id = $2 AND user_b_id = $1)
-       RETURNING *`,
+          OR (user_a_id = $2 AND user_b_id = $1)`,
       [userId, friendId],
     );
 
-    if (result.rows.length === 0) {
+    if (friendResult.rows.length === 0) {
       throw new NotFoundException('好友关系不存在');
     }
+
+    // 删除好友关系
+    await this.db.query(
+      `DELETE FROM friendships
+       WHERE (user_a_id = $1 AND user_b_id = $2)
+          OR (user_a_id = $2 AND user_b_id = $1)`,
+      [userId, friendId],
+    );
 
     return { message: '已删除好友' };
   }

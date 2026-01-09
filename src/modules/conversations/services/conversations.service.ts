@@ -50,10 +50,14 @@ export class ConversationsService {
         conversationId = existingConv.rows[0].id;
       } else {
         // 创建单聊会话
-        const result = await this.db.query(
+        await this.db.query(
           `INSERT INTO conversations (type, updated_at)
-           VALUES (0, NOW())
-           RETURNING *`,
+           VALUES (0, NOW())`,
+          [],
+        );
+
+        const result = await this.db.query(
+          `SELECT * FROM conversations WHERE type = 0 ORDER BY created_at DESC LIMIT 1`,
           [],
         );
 
@@ -77,11 +81,15 @@ export class ConversationsService {
       }
 
       // 创建群聊会话
-      const result = await this.db.query(
+      await this.db.query(
         `INSERT INTO conversations (type, name, owner_id, updated_at)
-           VALUES (1, $1, $2, NOW())
-           RETURNING *`,
+           VALUES (1, $1, $2, NOW())`,
         [name, userId],
+      );
+
+      const result = await this.db.query(
+        `SELECT * FROM conversations WHERE type = 1 AND name = $1 ORDER BY created_at DESC LIMIT 1`,
+        [name],
       );
 
       conversationId = result.rows[0].id;
@@ -130,8 +138,8 @@ export class ConversationsService {
                   )
               ) as unread_count,
               (
-                SELECT json_agg(
-                  json_build_object(
+                SELECT JSON_ARRAYAGG(
+                  JSON_OBJECT(
                     'id', u.id,
                     'username', u.username,
                     'nickname', u.nickname,
@@ -187,10 +195,10 @@ export class ConversationsService {
 
     // 获取会话详情
     const result = await this.db.query(
-      `SELECT c.*,
+      `SELECT       c.*,
               (
-                SELECT json_agg(
-                  json_build_object(
+                SELECT JSON_ARRAYAGG(
+                  JSON_OBJECT(
                     'id', u.id,
                     'username', u.username,
                     'nickname', u.nickname,

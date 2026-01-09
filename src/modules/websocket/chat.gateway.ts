@@ -243,8 +243,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // TODO: 查询数据库获取会话成员
     // const members = await this.conversationService.getConversationMembers(payload.conversationId);
 
-    const onlineMembers = [];
-    const offlineMembers = [];
+    const onlineMembers: string[] = [];
+    const offlineMembers: string[] = [];
 
     for (const [memberId, member] of this.onlineUsers.entries()) {
       if (member.userId === userId) continue; // 不包含自己

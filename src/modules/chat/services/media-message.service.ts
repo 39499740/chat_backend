@@ -109,7 +109,9 @@ export class MediaMessageService {
 
       this.logger.log(`Image message processed: ${messageId}`);
     } catch (error) {
-      this.logger.error(`Error processing image message: ${error.message}`);
+      this.logger.error(
+        `Error processing image message: ${error instanceof Error ? error.message : String(error)}`,
+      );
       // 不抛出错误，允许消息发送成功
     }
   }
@@ -132,7 +134,9 @@ export class MediaMessageService {
 
       this.logger.log(`Video message processed: ${messageId}`);
     } catch (error) {
-      this.logger.error(`Error processing video message: ${error.message}`);
+      this.logger.error(
+        `Error processing video message: ${error instanceof Error ? error.message : String(error)}`,
+      );
       // 不抛出错误，允许消息发送成功
     }
   }
@@ -151,7 +155,9 @@ export class MediaMessageService {
 
       this.logger.log(`Audio message processed: ${messageId}`);
     } catch (error) {
-      this.logger.error(`Error processing audio message: ${error.message}`);
+      this.logger.error(
+        `Error processing audio message: ${error instanceof Error ? error.message : String(error)}`,
+      );
       // 不抛出错误，允许消息发送成功
     }
   }
@@ -167,7 +173,9 @@ export class MediaMessageService {
 
       this.logger.log(`Emoji message processed: ${messageId}`);
     } catch (error) {
-      this.logger.error(`Error processing emoji message: ${error.message}`);
+      this.logger.error(
+        `Error processing emoji message: ${error instanceof Error ? error.message : String(error)}`,
+      );
       // 不抛出错误，允许消息发送成功
     }
   }
@@ -186,7 +194,9 @@ export class MediaMessageService {
 
       this.logger.log(`File message processed: ${messageId}`);
     } catch (error) {
-      this.logger.error(`Error processing file message: ${error.message}`);
+      this.logger.error(
+        `Error processing file message: ${error instanceof Error ? error.message : String(error)}`,
+      );
       // 不抛出错误，允许消息发送成功
     }
   }

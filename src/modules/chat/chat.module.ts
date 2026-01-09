@@ -6,9 +6,10 @@ import { GroupChatNotificationService } from './services/group-chat-notification
 import { MediaMessageService } from './services/media-message.service';
 import { OfflineMessageService } from './services/offline-message.service';
 import { WebSocketModule } from '../websocket/websocket.module';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
-  imports: [DatabaseModule, WebSocketModule],
+  imports: [DatabaseModule, WebSocketModule, AuthModule],
   controllers: [MessagesController],
   providers: [
     MessagesService,

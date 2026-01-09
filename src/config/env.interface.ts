@@ -5,7 +5,7 @@ export interface EnvironmentVariables {
   API_PREFIX: string;
 
   // 数据库配置
-  DB_TYPE: 'postgres';
+  DB_TYPE: 'mysql' | 'postgres';
   DB_HOST: string;
   DB_PORT: number;
   DB_USERNAME: string;

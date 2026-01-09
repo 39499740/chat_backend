@@ -42,7 +42,10 @@ export class OfflineMessageService {
 
       this.logger.log(`Offline message stored for user ${userId}: ${message.id}`);
     } catch (error) {
-      this.logger.error(`Error storing offline message: ${error.message}`, error.stack);
+      this.logger.error(
+        `Error storing offline message: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
     }
   }
 
@@ -65,7 +68,10 @@ export class OfflineMessageService {
 
       return parsedMessages;
     } catch (error) {
-      this.logger.error(`Error getting offline messages: ${error.message}`, error.stack);
+      this.logger.error(
+        `Error getting offline messages: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       return [];
     }
   }
@@ -82,7 +88,10 @@ export class OfflineMessageService {
 
       return count;
     } catch (error) {
-      this.logger.error(`Error clearing offline messages: ${error.message}`, error.stack);
+      this.logger.error(
+        `Error clearing offline messages: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       return 0;
     }
   }
@@ -123,7 +132,10 @@ export class OfflineMessageService {
       // 清除已发送的离线消息
       await this.clearOfflineMessages(userId);
     } catch (error) {
-      this.logger.error(`Error sending offline messages: ${error.message}`, error.stack);
+      this.logger.error(
+        `Error sending offline messages: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
     }
   }
 
@@ -175,7 +187,10 @@ export class OfflineMessageService {
         conversations,
       };
     } catch (error) {
-      this.logger.error(`Error getting offline message stats: ${error.message}`, error.stack);
+      this.logger.error(
+        `Error getting offline message stats: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       return {
         total: 0,
         conversations: [],
@@ -199,7 +214,10 @@ export class OfflineMessageService {
         `Offline messages marked as read for user ${userId}, conversation ${conversationId}`,
       );
     } catch (error) {
-      this.logger.error(`Error marking offline messages as read: ${error.message}`, error.stack);
+      this.logger.error(
+        `Error marking offline messages as read: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
     }
   }
 
@@ -230,7 +248,10 @@ export class OfflineMessageService {
 
       return offlineMessages.length + dbUnreadCount;
     } catch (error) {
-      this.logger.error(`Error getting unread count: ${error.message}`, error.stack);
+      this.logger.error(
+        `Error getting unread count: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
       return 0;
     }
   }
@@ -252,7 +273,10 @@ export class OfflineMessageService {
       const key = `offline:message:${userId}`;
       await this.redisService.expire(key, this.OFFLINE_MESSAGE_TTL);
     } catch (error) {
-      this.logger.error(`Error refreshing offline messages TTL: ${error.message}`, error.stack);
+      this.logger.error(
+        `Error refreshing offline messages TTL: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error.stack : undefined,
+      );
     }
   }
 }
