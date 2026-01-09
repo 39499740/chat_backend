@@ -12,7 +12,7 @@
 
 - ✅ `docker-compose.yml` 已配置并验证
 - ✅ 包含服务：
-  - PostgreSQL 16 (端口 5432)
+  - MySQL 16 (端口 5432)
   - Redis 7 (端口 6379)
   - MinIO (端口 9000, 9001)
 
@@ -31,7 +31,7 @@
 
 - ✅ 所有容器已启动并运行
 - ✅ 健康检查通过：
-  - `chat_postgres`: Up (healthy)
+  - `chat_MySQL`: Up (healthy)
   - `chat_redis`: Up (healthy)
   - `chat_minio`: Up (healthy)
 
@@ -39,7 +39,7 @@
 
 #### 数据库表结构
 
-- ✅ `docker/postgres/init/01-init.sql` 已创建并包含完整的表结构：
+- ✅ `docker/MySQL/init/01-init.sql` 已创建并包含完整的表结构：
   - 用户系统表（users, user_sessions, user_settings）
   - 社交系统表（friendships, friend_requests, blocked_users）
   - 聊天系统表（conversations, conversation_members）
@@ -153,14 +153,14 @@ docker-compose down
 #### 数据库操作
 
 ```bash
-# 连接到 PostgreSQL
-docker-compose exec postgres psql -U chat_user chat_backend
+# 连接到 MySQL
+docker-compose exec MySQL psql -U chat_user chat_backend
 
 # 备份数据库
-docker-compose exec postgres pg_dump -U chat_user chat_backend > backup.sql
+docker-compose exec MySQL pg_dump -U chat_user chat_backend > backup.sql
 
 # 恢复数据库
-docker-compose exec -T postgres psql -U chat_user chat_backend < backup.sql
+docker-compose exec -T MySQL psql -U chat_user chat_backend < backup.sql
 ```
 
 ## 📊 测试执行命令
@@ -180,14 +180,14 @@ open coverage/lcov-report/index.html
 
 ### 首次启动注意事项
 
-1. Docker 容器将自动拉取镜像（MinIO、PostgreSQL、Redis）
+1. Docker 容器将自动拉取镜像（MinIO、MySQL、Redis）
 2. 首次启动可能需要几分钟下载镜像
 3. 确保端口 5432、6379、9000、9001、3000、3001 未被占用
 4. 数据库初始化脚本将在容器启动时自动执行
 
 ### 数据库连接
 
-- PostgreSQL 数据库将在容器首次启动时自动初始化
+- MySQL 数据库将在容器首次启动时自动初始化
 - 包含完整的表结构、索引和触发器
 - 插入了测试用户数据用于验证
 
@@ -200,8 +200,8 @@ open coverage/lcov-report/index.html
 ### 服务健康检查
 
 ```bash
-# 检查 PostgreSQL 健康
-docker-compose ps | grep postgres
+# 检查 MySQL 健康
+docker-compose ps | grep MySQL
 
 # 检查 Redis 健康
 docker-compose ps | grep redis
@@ -210,7 +210,7 @@ docker-compose ps | grep redis
 docker-compose ps | grep minio
 
 # 进入容器检查日志
-docker-compose logs postgres
+docker-compose logs MySQL
 docker-compose logs redis
 docker-compose logs minio
 ```
@@ -237,7 +237,7 @@ kill -9 <PID>
 
 ```bash
 # 查看详细日志
-docker-compose logs postgres
+docker-compose logs MySQL
 
 # 重新启动
 docker-compose down
@@ -252,13 +252,13 @@ docker-compose up -d
 
 ```bash
 # 检查数据库状态
-docker-compose exec postgres psql -U chat_user -c "SELECT version();"
+docker-compose exec MySQL psql -U chat_user -c "SELECT version();"
 
 # 重启数据库容器
-docker-compose restart postgres
+docker-compose restart MySQL
 
 # 查看数据库日志
-docker-compose logs postgres | grep ERROR
+docker-compose logs MySQL | grep ERROR
 ```
 
 #### 4. 测试失败
@@ -279,7 +279,7 @@ npm test -- --clearCache
 
 ### 数据库优化
 
-1. PostgreSQL 配置（已在 docker-compose.yml 中设置）
+1. MySQL 配置（已在 docker-compose.yml 中设置）
    - max: 20（最大连接数）
    - 连接超时: 2000ms
    - 空闲超时: 30000ms
@@ -401,7 +401,7 @@ npm test -- --clearCache
 ### 技术栈版本
 
 - Node.js: v24.11.1
-- PostgreSQL: 16
+- MySQL: 16
 - Redis: 7
 - MinIO: Latest
 - Docker Compose: v3.8

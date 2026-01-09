@@ -113,7 +113,7 @@
 
 | 服务           | 版本   | 用途               |
 | -------------- | ------ | ------------------ |
-| **PostgreSQL** | >=16.0 | 关系型数据库       |
+| **MySQL** | >=16.0 | 关系型数据库       |
 | **Redis**      | >=7.0  | 缓存和会话存储     |
 | **MinIO**      | 最新   | 对象存储（S3兼容） |
 
@@ -282,8 +282,8 @@ docker-compose down -v
 #### 3.3.2 验证服务连接
 
 ```bash
-# 测试PostgreSQL连接
-docker exec -it postgres psql -U chat_user -d chat_backend -c "SELECT 1;"
+# 测试MySQL连接
+docker exec -it mysql psql -U chat_user -d chat_backend -c "SELECT 1;"
 
 # 测试Redis连接
 docker exec -it redis redis-cli -a redis_password PING
@@ -343,21 +343,21 @@ http://localhost:3000/api
 #### 3.5.1 运行数据库迁移
 
 ```bash
-# PostgreSQL会自动运行初始化脚本
-# docker/postgres/init/01-init.sql
+# MySQL会自动运行初始化脚本
+# docker/mysql/init/01-init.sql
 
 # 查看数据库表
-docker exec -it postgres psql -U chat_user -d chat_backend -c "\dt"
+docker exec -it mysql psql -U chat_user -d chat_backend -c "\dt"
 
 # 查看表结构
-docker exec -it postgres psql -U chat_user -d chat_backend -c "\d users"
+docker exec -it mysql psql -U chat_user -d chat_backend -c "\d users"
 ```
 
 #### 3.5.2 插入测试数据
 
 ```bash
-# 连接到PostgreSQL
-docker exec -it postgres psql -U chat_user -d chat_backend
+# 连接到MySQL
+docker exec -it mysql psql -U chat_user -d chat_backend
 
 # 插入测试用户
 INSERT INTO users (id, username, email, password_hash, nickname, is_active, created_at)
@@ -381,7 +381,7 @@ VALUES (
   NOW()
 );
 
-# 退出PostgreSQL
+# 退出MySQL
 \q
 ```
 
@@ -397,17 +397,17 @@ VALUES (
 version: '3.8'
 
 services:
-  # PostgreSQL数据库
-  postgres:
-    image: postgres:16-alpine
-    container_name: chat_postgres
+  # MySQL数据库
+  mysql:
+    image: mysql:16-alpine
+    container_name: chat_mysql
     environment:
-      POSTGRES_DB: ${DB_NAME:-chat_backend}
-      POSTGRES_USER: ${DB_USER:-chat_user}
-      POSTGRES_PASSWORD: ${DB_PASSWORD:-chat_password}
+      mysql_DB: ${DB_NAME:-chat_backend}
+      mysql_USER: ${DB_USER:-chat_user}
+      mysql_PASSWORD: ${DB_PASSWORD:-chat_password}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./docker/postgres/init:/docker-entrypoint-initdb.d
+      - mysql_data:/var/lib/MySQL/data
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d
     ports:
       - "${DB_PORT:-5432}:5432"
     healthcheck:
@@ -464,7 +464,7 @@ services:
     build: .
     container_name: chat_app
     depends_on:
-      postgres:
+      mysql:
         condition: service_healthy
       redis:
         condition: service_healthy
@@ -474,7 +474,7 @@ services:
       NODE_ENV: ${NODE_ENV:-production}
       PORT: ${PORT:-3000}
       API_PREFIX: ${API_PREFIX:-api}
-      DB_HOST: postgres
+      DB_HOST: mysql
       DB_PORT: 5432
       DB_NAME: ${DB_NAME:-chat_backend}
       DB_USER: ${DB_USER:-chat_user}
@@ -507,7 +507,7 @@ services:
       - chat_network
 
 volumes:
-  postgres_data:
+  mysql_data:
   redis_data:
   minio_data:
 
@@ -523,21 +523,21 @@ networks:
 version: '3.8'
 
 services:
-  postgres:
-    image: postgres:16-alpine
-    container_name: chat_postgres
+  mysql:
+    image: mysql:16-alpine
+    container_name: chat_mysql
     environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      mysql_DB: ${DB_NAME}
+      mysql_USER: ${DB_USER}
+      mysql_PASSWORD: ${DB_PASSWORD}
       # 性能优化
-      POSTGRES_SHARED_BUFFERS: 256MB
-      POSTGRES_EFFECTIVE_CACHE_SIZE: 2GB
-      POSTGRES_WORK_MEM: 1GB
-      POSTGRES_MAINTENANCE_WORK_MEM: 256MB
+      mysql_SHARED_BUFFERS: 256MB
+      mysql_EFFECTIVE_CACHE_SIZE: 2GB
+      mysql_WORK_MEM: 1GB
+      mysql_MAINTENANCE_WORK_MEM: 256MB
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./docker/postgres/init:/docker-entrypoint-initdb.d
+      - mysql_data:/var/lib/MySQL/data
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d
     ports:
       - '5432:5432'
     deploy:
@@ -569,7 +569,7 @@ services:
     image: chat-backend:latest
     container_name: chat_app
     depends_on:
-      - postgres
+      - mysql
       - redis
     environment:
       NODE_ENV: production
@@ -807,10 +807,10 @@ keepalive_requests 100;
 
 ### 5.3 数据库高可用
 
-#### 5.3.1 PostgreSQL主从复制
+#### 5.3.1 MySQL主从复制
 
 ```sql
--- 主库配置（postgresql.conf）
+-- 主库配置（MySQL.conf）
 listen_addresses = '*'
 max_connections = 200
 shared_buffers = 256MB
@@ -825,12 +825,12 @@ synchronous_commit = on
 
 -- 归档配置
 archive_mode = on
-archive_command = 'cp %p /var/lib/postgresql/archive/%f'
+archive_command = 'cp %p /var/lib/MySQL/archive/%f'
 ```
 
 ```bash
 # 配置从库（standby）
-docker exec -it postgres_standby psql -U replication_user -d chat_backend -c "SELECT pg_is_in_recovery();"
+docker exec -it mysql_standby psql -U replication_user -d chat_backend -c "SELECT pg_is_in_recovery();"
 ```
 
 ### 5.4 Redis集群
@@ -962,7 +962,7 @@ chat_backend/
 │   ├── configuration.ts    # 配置管理
 │   └── validation.ts       # 配置验证
 ├── docker/
-│   ├── postgres/
+│   ├── mysql/
 │   │   └── init/
 │   │       └── 01-init.sql
 │   └── docker-compose.yml
@@ -1020,7 +1020,7 @@ journalctl -u docker -f
 
 ```bash
 # 数据库查询分析
-docker exec -it chat_postgres psql -U chat_user -d chat_backend -c "
+docker exec -it chat_mysql psql -U chat_user -d chat_backend -c "
   SELECT query, calls, total_time, mean_time, max_time
   FROM pg_stat_statements
   ORDER BY total_time DESC
@@ -1028,7 +1028,7 @@ docker exec -it chat_postgres psql -U chat_user -d chat_backend -c "
 "
 
 # 慢查询日志
-docker exec -it chat_postgres psql -U chat_user -d chat_backend -c "
+docker exec -it chat_mysql psql -U chat_user -d chat_backend -c "
   SELECT * FROM pg_stat_statements
   WHERE mean_time > 1000
   ORDER BY mean_time DESC;
@@ -1049,7 +1049,7 @@ pm2 show chat-backend
 
 ```bash
 # 1. 备份数据库
-docker exec chat_postgres pg_dump -U chat_user chat_backend > backup_$(date +%Y%m%d).sql
+docker exec chat_mysql pg_dump -U chat_user chat_backend > backup_$(date +%Y%m%d).sql
 
 # 2. 拉取最新代码
 git pull origin master
@@ -1239,7 +1239,7 @@ logger.info({
 #!/bin/bash
 # backup-database.sh
 
-BACKUP_DIR="/backups/postgres"
+BACKUP_DIR="/backups/mysql"
 DATE=$(date +%Y%m%d_%H%M%S)
 FILENAME="chat_backend_${DATE}.sql"
 
@@ -1247,7 +1247,7 @@ FILENAME="chat_backend_${DATE}.sql"
 mkdir -p $BACKUP_DIR
 
 # 执行备份
-docker exec chat_postgres pg_dump -U chat_user chat_backend > $BACKUP_DIR/$FILENAME
+docker exec chat_mysql pg_dump -U chat_user chat_backend > $BACKUP_DIR/$FILENAME
 
 # 压缩备份
 gzip $BACKUP_DIR/$FILENAME
@@ -1283,7 +1283,7 @@ crontab -e
 # restore-database.sh
 
 BACKUP_FILE=$1
-BACKUP_DIR="/backups/postgres"
+BACKUP_DIR="/backups/mysql"
 
 if [ -z "$BACKUP_FILE" ]; then
   echo "Usage: $0 <backup_file>"
@@ -1291,10 +1291,10 @@ if [ -z "$BACKUP_FILE" ]; then
 fi
 
 # 解压备份文件
-gunzip -c $BACKUP_DIR/$BACKUP_FILE | docker exec -i chat_postgres psql -U chat_user -d chat_backend
+gunzip -c $BACKUP_DIR/$BACKUP_FILE | docker exec -i chat_mysql psql -U chat_user -d chat_backend
 
 # 或者直接恢复SQL文件
-docker exec -i chat_postgres psql -U chat_user -d chat_backend < $BACKUP_DIR/$BACKUP_FILE
+docker exec -i chat_mysql psql -U chat_user -d chat_backend < $BACKUP_DIR/$BACKUP_FILE
 
 echo "Restore completed: $BACKUP_FILE"
 ```
@@ -1350,7 +1350,7 @@ docker-compose ps
 netstat -tuln | grep :3000
 
 # 5. 测试数据库连接
-docker exec -it postgres psql -U chat_user -d chat_backend -c "SELECT 1;"
+docker exec -it mysql psql -U chat_user -d chat_backend -c "SELECT 1;"
 
 # 6. 检查Redis连接
 docker exec -it redis redis-cli -a redis_password PING
@@ -1365,28 +1365,28 @@ docker exec -it redis redis-cli -a redis_password PING
 
 #### 10.1.2 数据库连接失败
 
-**问题**：无法连接到PostgreSQL
+**问题**：无法连接到MySQL
 
 **排查步骤**：
 
 ```bash
-# 1. 检查PostgreSQL是否运行
-docker ps | grep postgres
+# 1. 检查MySQL是否运行
+docker ps | grep mysql
 
-# 2. 检查PostgreSQL日志
-docker logs chat_postgres
+# 2. 检查MySQL日志
+docker logs chat_mysql
 
 # 3. 测试网络连接
 telnet localhost 5432
 
 # 4. 检查数据库用户权限
-docker exec -it postgres psql -U chat_user -d chat_backend -c "\du"
+docker exec -it mysql psql -U chat_user -d chat_backend -c "\du"
 
 # 5. 检查连接池配置
 # 查看数据库配置是否正确
 
 # 常见原因：
-# - PostgreSQL服务未启动
+# - MySQL服务未启动
 # - 网络连接问题
 # - 用户名或密码错误
 # - 数据库名称不存在
@@ -1406,7 +1406,7 @@ htop
 free -h
 
 # 2. 检查数据库查询性能
-docker exec -it chat_postgres psql -U chat_user -d chat_backend -c "
+docker exec -it chat_mysql psql -U chat_user -d chat_backend -c "
   SELECT query, calls, total_time, mean_time, max_time
   FROM pg_stat_statements
   ORDER BY total_time DESC
@@ -1417,7 +1417,7 @@ docker exec -it chat_postgres psql -U chat_user -d chat_backend -c "
 docker exec -it chat_redis redis-cli INFO stats
 
 # 4. 检查慢查询
-docker exec -it chat_postgres psql -U chat_user -d chat_backend -c "
+docker exec -it chat_mysql psql -U chat_user -d chat_backend -c "
   SELECT * FROM pg_stat_statements
   WHERE mean_time > 1000
   ORDER BY mean_time DESC
@@ -1568,8 +1568,8 @@ npm run start:prod            # 生产模式启动
 npm test                       # 运行测试
 
 # 数据库操作
-docker exec -it postgres psql -U chat_user -d chat_backend  # 连接数据库
-docker exec -it postgres pg_dump -U chat_user chat_backend > backup.sql  # 备份数据库
+docker exec -it mysql psql -U chat_user -d chat_backend  # 连接数据库
+docker exec -it mysql pg_dump -U chat_user chat_backend > backup.sql  # 备份数据库
 
 # Redis操作
 docker exec -it redis redis-cli -a redis_password PING  # 测试连接
@@ -1592,7 +1592,7 @@ curl http://localhost:3000/api/health  # 健康检查
 | ---- | ------------- | ------------------ |
 | 3000 | HTTP API      | RESTful API接口    |
 | 3001 | WebSocket     | WebSocket服务      |
-| 5432 | PostgreSQL    | 数据库             |
+| 5432 | MySQL    | 数据库             |
 | 6379 | Redis         | 缓存               |
 | 9000 | MinIO API     | 对象存储API        |
 | 9001 | MinIO Console | 对象存储管理控制台 |

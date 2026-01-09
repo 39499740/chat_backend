@@ -130,8 +130,8 @@ NODE_ENV=test
 DB_HOST=localhost
 DB_PORT=5433
 DB_NAME=chat_test
-DB_USER=postgres
-DB_PASSWORD=postgres
+DB_USER=mysql
+DB_PASSWORD=mysql
 REDIS_HOST=localhost
 REDIS_PORT=6380
 MINIO_ENDPOINT=localhost:9001
@@ -140,7 +140,7 @@ JWT_SECRET=test-secret-key
 
 ### 测试数据库
 
-- 使用 PostgreSQL 测试数据库
+- 使用 MySQL 测试数据库
 - 每次测试前自动清空数据
 - 使用测试种子数据填充
 
@@ -836,10 +836,10 @@ jobs:
     runs-on: ubuntu-latest
 
     services:
-      postgres:
-        image: postgres:16
+      mysql:
+        image: mysql:16
         env:
-          POSTGRES_PASSWORD: postgres
+          mysql_PASSWORD: mysql
         options: >-
           --health-cmd pg_isready
           --health-interval 10s

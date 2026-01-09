@@ -43,7 +43,7 @@
 
 ```yaml
 Node Version: v18.x
-Database: PostgreSQL 16
+Database: MySQL 16
 Cache: Redis 7
 Object Storage: MinIO
 ```

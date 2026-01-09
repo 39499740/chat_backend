@@ -17,7 +17,7 @@
 
 - **后端框架**: NestJS v10.4.20
 - **编程语言**: TypeScript v5.3.3
-- **数据库**: PostgreSQL 16
+- **数据库**: MySQL 16
 - **缓存**: Redis 7
 - **对象存储**: MinIO
 - **实时通信**: Socket.IO v4.8.3

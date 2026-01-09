@@ -11,7 +11,7 @@
 ### 1.1 基础设施
 
 - ✅ Node.js >= 18.0.0
-- ✅ PostgreSQL 16
+- ✅ MySQL 16
 - ✅ Redis 7
 - ✅ MinIO（对象存储）
 - ✅ Artillery（性能测试工具）
@@ -70,7 +70,7 @@
 
    ```bash
    cd docker
-   docker-compose up -d postgres redis minio
+   docker-compose up -d MySQL redis minio
    ```
 
 2. **初始化数据库**
@@ -196,7 +196,7 @@
 1. **连接池配置**
 
    ```typescript
-   // PostgreSQL 连接池
+   // MySQL 连接池
    { max: 20, idleTimeoutMillis: 30000 }
    ```
 

@@ -120,7 +120,7 @@
 ┌─────────────────────────────────────────────┐
 │           数据存储层 (Storage Layer)      │
 │  ┌──────────┐  ┌──────────┐           │
-│  │PostgreSQL │  │  Redis    │           │
+│  │MySQL │  │  Redis    │           │
 │  │ Database  │  │  Cache    │           │
 │  └──────────┘  └──────────┘           │
 │  ┌────────────────────────────┐          │
@@ -136,7 +136,7 @@
 | -------------- | ---------- | ------- | ------------------------ |
 | **后端框架**   | NestJS     | 10.4.20 | 企业级Node.js框架        |
 | **编程语言**   | TypeScript | 5.3.3   | 类型安全的JavaScript超集 |
-| **数据库**     | PostgreSQL | 16      | 关系型数据库             |
+| **数据库**     | MySQL | 16      | 关系型数据库             |
 | **缓存**       | Redis      | 7       | 内存数据库               |
 | **对象存储**   | MinIO      | 最新    | S3兼容对象存储           |
 | **实时通信**   | Socket.IO  | 4.8.3   | WebSocket库              |
@@ -157,7 +157,7 @@
         ┌─────────────────┼─────────────────┐
         │                 │                 │
    ┌────┴────┐     ┌─────┴─────┐     ┌────┴────┐
-   │PostgreSQL │     │   Redis    │     │  MinIO   │
+   │MySQL │     │   Redis    │     │  MinIO   │
    │  :5432   │     │  :6379    │     │ :9000    │
    └──────────┘     └────────────┘     └──────────┘
         │                 │                 │
@@ -1226,7 +1226,7 @@ const MAX_FILE_SIZE = {
 #### 7.1.3 连接池配置
 
 ```typescript
-// PostgreSQL连接池配置
+// MySQL连接池配置
 const pool = new Pool({
   host: process.env.DB_HOST,
   port: parseInt(process.env.DB_PORT || '5432'),
@@ -1319,7 +1319,7 @@ await this.db.query(
 ```
 开发环境配置：
 - Node.js: 18.0+
-- PostgreSQL: 16 (Docker)
+- MySQL: 16 (Docker)
 - Redis: 7 (Docker)
 - MinIO: Latest (Docker)
 - 应用端口: 3000
@@ -1351,14 +1351,14 @@ await this.db.query(
 version: '3.8'
 
 services:
-  postgres:
-    image: postgres:16
+  mysql:
+    image: mysql:16
     environment:
-      POSTGRES_DB: ${DB_NAME}
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      mysql_DB: ${DB_NAME}
+      mysql_USER: ${DB_USER}
+      mysql_PASSWORD: ${DB_PASSWORD}
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - mysql_data:/var/lib/MySQL/data
     ports:
       - '5432:5432'
 
@@ -1384,12 +1384,12 @@ services:
   app:
     build: .
     depends_on:
-      - postgres
+      - mysql
       - redis
       - minio
     environment:
       NODE_ENV: ${NODE_ENV}
-      DB_HOST: postgres
+      DB_HOST: mysql
       REDIS_HOST: redis
       MINIO_ENDPOINT: http://minio:9000
     ports:
@@ -1397,7 +1397,7 @@ services:
     restart: unless-stopped
 
 volumes:
-  postgres_data:
+  mysql_data:
   redis_data:
   minio_data:
 ```

@@ -12,7 +12,7 @@
 
 - ✅ `docker-compose.yml` 已配置并验证
 - ✅ 包含所有必需服务：
-  - PostgreSQL 16 (端口 5432)
+  - MySQL 16 (端口 5432)
   - Redis 7 (端口 6379)
   - MinIO (端口 9000, 9001)
 
@@ -326,7 +326,7 @@ docker-compose logs -f --tail=50
 ### 日志查看
 
 ```bash
-# PostgreSQL 日志
+# MySQL 日志
 docker-compose logs postgres --tail=100
 
 # Redis 日志
@@ -400,7 +400,7 @@ docker-compose logs
 - ✅ WebSocket 通信
 - ✅ Redis 缓存和会话存储
 - ✅ MinIO 对象存储
-- ✅ PostgreSQL 持久化
+- ✅ MySQL 持久化
 
 ### 待优化
 

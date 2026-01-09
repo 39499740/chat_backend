@@ -130,7 +130,7 @@
 #### 2.3.1 技术约束
 
 - 后端框架：NestJS (TypeScript)
-- 数据库：PostgreSQL 16+
+- 数据库：MySQL 16+
 - 缓存：Redis 7+
 - 对象存储：MinIO (S3兼容)
 - 实时通信：Socket.IO
@@ -168,7 +168,7 @@
 
 #### 2.4.2 依赖
 
-- PostgreSQL数据库服务
+- MySQL数据库服务
 - Redis缓存服务
 - MinIO对象存储服务
 - 邮件发送服务（SMTP）
@@ -961,7 +961,7 @@
 
 ### 5.2 硬件接口
 
-- **数据库服务器**: PostgreSQL 16 (最低配置：4CPU, 8GB RAM, 100GB SSD)
+- **数据库服务器**: MySQL 16 (最低配置：4CPU, 8GB RAM, 100GB SSD)
 - **缓存服务器**: Redis 7 (最低配置：2CPU, 4GB RAM, 50GB SSD)
 - **存储服务器**: MinIO (最低配置：4CPU, 8GB RAM, 500GB HDD)
 
@@ -969,7 +969,7 @@
 
 | 外部服务 | 协议 | 用途 |
 |---------|------|------|
-| PostgreSQL | TCP/IP | 数据存储 |
+| MySQL | TCP/IP | 数据存储 |
 | Redis | TCP/IP | 缓存和会话 |
 | MinIO | S3 API | 文件存储 |
 | SMTP | SMTP | 邮件发送（可选）|
@@ -981,7 +981,7 @@
 |------|------|------|
 | HTTP/HTTPS | 3000 | RESTful API |
 | WebSocket | 3001 | 实时通信 |
-| PostgreSQL | 5432 | 数据库连接 |
+| MySQL | 5432 | 数据库连接 |
 | Redis | 6379 | 缓存连接 |
 | MinIO API | 9000 | 文件存储API |
 | MinIO Console | 9001 | 管理控制台 |
@@ -1040,7 +1040,7 @@
 
 ### 7.3 数据库
 
-- **类型**: PostgreSQL 16
+- **类型**: MySQL 16
 - **字符集**: UTF-8 (支持emoji)
 - **备份**: 每日全量，每小时增量
 - **归档**: 6个月以上数据归档

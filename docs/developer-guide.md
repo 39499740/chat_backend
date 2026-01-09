@@ -45,7 +45,7 @@ cd docker
 docker-compose up -d
 
 # 5. 初始化数据库
-docker exec -it postgres psql -U chat_user -d chat_backend -f -a docker/postgres/init/01-init.sql
+docker exec -it mysql psql -U chat_user -d chat_backend -f -a docker/mysql/init/01-init.sql
 
 # 6. 启动应用
 npm run start:dev
@@ -118,7 +118,7 @@ chat_backend/
 | 软件                | 版本要求 | 用途               |
 | ------------------- | -------- | ------------------ |
 | **Redis Commander** | Latest   | Redis GUI工具      |
-| **TablePlus**       | Latest   | PostgreSQL GUI工具 |
+| **TablePlus**       | Latest   | MySQL GUI工具 |
 | **MinIO Client**    | Latest   | MinIO GUI工具      |
 | **Postman**         | Latest   | API测试工具        |
 
@@ -828,8 +828,8 @@ docker cp chat_app:/app/file.txt local/file.txt
 ### 5.4 数据库命令
 
 ```bash
-# 连接到PostgreSQL
-docker exec -it postgres psql -U chat_user -d chat_backend
+# 连接到MySQL
+docker exec -it mysql psql -U chat_user -d chat_backend
 
 # 查看所有表
 \dt
@@ -1110,25 +1110,25 @@ docker-compose up -d --force-recreate
 
 #### 7.1.3 数据库连接失败
 
-**问题**：无法连接到PostgreSQL
+**问题**：无法连接到MySQL
 
 **排查步骤**：
 
 ```bash
-# 1. 检查PostgreSQL是否运行
-docker ps | grep postgres
+# 1. 检查MySQL是否运行
+docker ps | grep mysql
 
 # 2. 检查连接配置
 # 查看.env文件中的DB_HOST、DB_PORT等
 
 # 3. 测试连接
-docker exec -it postgres psql -U chat_user -d chat_backend -c "SELECT 1;"
+docker exec -it mysql psql -U chat_user -d chat_backend -c "SELECT 1;"
 
 # 4. 检查网络连接
-docker exec -it app ping postgres -c "ping -c 1"
+docker exec -it app ping mysql -c "ping -c 1"
 
 # 5. 查看数据库日志
-docker logs chat_postgres
+docker logs chat_mysql
 ```
 
 ### 7.2 编译问题
@@ -1367,7 +1367,7 @@ feat: 添加群聊功能
 
 - 使用ConversationsModule
 - 集成WebSocket实时通知
-- 使用PostgreSQL存储群聊数据
+- 使用MySQL存储群聊数据
 ```
 
 #### 8.2.2 PR检查清单
@@ -1465,7 +1465,7 @@ Closes #456
 | -------------- | -------------------------------- |
 | NestJS文档     | https://docs.nestjs.com/         |
 | TypeScript文档 | https://www.typescriptlang.org/  |
-| PostgreSQL文档 | https://www.postgresql.org/docs/ |
+| MySQL文档 | https://www.MySQL.org/docs/ |
 | Redis文档      | https://redis.io/documentation   |
 | Docker文档     | https://docs.docker.com/         |
 | Socket.IO文档  | https://socket.io/               |

@@ -6,7 +6,7 @@
 
 所有必需的 Docker 容器均已启动并正常运行：
 
-- **PostgreSQL** (chat_postgres): Up 8 hours (healthy)
+- **MySQL** (chat_postgres): Up 8 hours (healthy)
   - 端口: 5432 → 5432
   - 数据库: chat_backend
   - 用户: chat_user
@@ -27,9 +27,9 @@
 `.env` 文件已正确配置：
 
 ```bash
-DB_TYPE=postgres
+DB_TYPE=mysql
 DB_HOST=localhost
-DB_PORT=5432
+DB_PORT=3307
 DB_USERNAME=chat_user
 DB_PASSWORD=chat_password
 DB_DATABASE=chat_backend
@@ -38,10 +38,6 @@ REDIS_PORT=6379
 REDIS_PASSWORD=redis_password
 MINIO_ENDPOINT=localhost
 MINIO_PORT=9000
-MINIO_ACCESS_KEY=minioadmin
-MINIO_SECRET_KEY=minioadmin
-MINIO_USE_SSL=false
-MINIO_BUCKET=chat-uploads
 ```
 
 ### ✅ 数据库验证

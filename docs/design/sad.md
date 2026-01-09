@@ -46,7 +46,7 @@
 本系统是一个基于NestJS的企业级社交应用后端，采用模块化单体架构，支持：
 - RESTful API
 - WebSocket实时通信
-- PostgreSQL持久化
+- MySQL持久化
 - Redis缓存
 - MinIO对象存储
 
@@ -121,7 +121,7 @@
         ┌─────────────▼─────────────┐
         │       数据层           │
         │  ┌───────────────────┐    │
-        │  │  PostgreSQL       │    │
+        │  │  MySQL       │    │
         │  │  Redis           │    │
         │  │  MinIO           │    │
         │  └───────────────────┘    │
@@ -171,7 +171,7 @@
           ┌────────────────▼────────────────┐
           │   Data Layer                │
           │  ┌────────────────────┐     │
-          │  │  PostgreSQL 16     │     │
+          │  │  MySQL 16     │     │
           │  │  (Primary)        │     │
           │  └────────────────────┘     │
           │  ┌────────────────────┐     │
@@ -204,7 +204,7 @@ AuthController.register()
     └─ 7. 返回用户信息和Token
     │
     ▼
-Database (PostgreSQL)
+Database (MySQL)
     │
     └─ INSERT INTO users (...)
 
@@ -235,7 +235,7 @@ ChatGateway.sendMessage()
     └─ 9. 更新未读数
     │
     ▼
-Database (PostgreSQL)
+Database (MySQL)
     │
     └─ INSERT INTO messages (...)
 ```
@@ -356,7 +356,7 @@ posts (动态表)
 - 正面：易于测试和维护
 - 负面：启动时性能略低于Express
 
-### ADR-002: 使用PostgreSQL + pg驱动
+### ADR-002: 使用MySQL + pg驱动
 
 **状态**: 已接受
 
@@ -366,10 +366,10 @@ posts (动态表)
 需要选择关系型数据库和访问方式。
 
 **决策**:
-使用PostgreSQL 16 + pg驱动（不使用TypeORM）。
+使用MySQL 16 + pg驱动（不使用TypeORM）。
 
 **理由**:
-- ✅ PostgreSQL性能优秀，支持复杂查询
+- ✅ MySQL性能优秀，支持复杂查询
 - ✅ pg驱动轻量级，性能优于ORM
 - ✅ 直接控制SQL，易于优化
 - ✅ 支持JSONB，灵活存储
@@ -903,13 +903,13 @@ notifications/
 | Node.js | 18+ | 运行时 |
 | NestJS | 10.3 | 应用框架 |
 | TypeScript | 5.3 | 编程语言 |
-| pg | 8.11 | PostgreSQL驱动 |
+| pg | 8.11 | MySQL驱动 |
 
 ### 7.2 数据和存储
 
 | 技术 | 版本 | 用途 |
 |------|------|------|
-| PostgreSQL | 16 | 关系型数据库 |
+| MySQL | 16 | 关系型数据库 |
 | Redis | 7 | 缓存和会话 |
 | MinIO | Latest | 对象存储 |
 
@@ -936,7 +936,7 @@ notifications/
 
 - 后端必须使用TypeScript
 - 必须使用NestJS框架
-- 数据库必须使用PostgreSQL
+- 数据库必须使用MySQL
 - 必须使用Docker容器化
 
 ### 8.2 业务约束
@@ -964,7 +964,7 @@ notifications/
 │  ┌───────────────────────┐    │
 │  │  Docker Compose     │    │
 │  │  - App            │    │
-│  │  - PostgreSQL     │    │
+│  │  - MySQL     │    │
 │  │  - Redis          │    │
 │  │  - MinIO          │    │
 │  └───────────────────────┘    │
@@ -991,7 +991,7 @@ notifications/
     └────────┬───────────┘
              │
     ┌────────▼───────────┐
-    │  PostgreSQL HA     │
+    │  MySQL HA     │
     │  - Primary        │
     │  - Standby        │
     └───────────────────┘
