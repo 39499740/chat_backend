@@ -17,19 +17,19 @@
 
 ## 技术栈
 
-| 组件          | 版本                                          | 说明     |
-| ------------- | --------------------------------------------- | -------- | -------------------------- |
-| **后端框架**  | [NestJS](https://nestjs.com/)                 | v10.4.20 | 企业级 Node.js 框架        |
-| **编程语言**  | [TypeScript](https://www.typescriptlang.org/) | v5.3.3   | 类型安全的 JavaScript 超集 |
-| **数据库**    | [PostgreSQL](https://www.postgresql.org/)     | v16      | 关系型数据库               |
-| **缓存**      | [Redis](https://redis.io/)                    | v7       | 内存数据库和会话存储       |
-| **对象存储**  | [MinIO](https://min.io/)                      | Latest   | S3 兼容的对象存储          |
-| **实时通信**  | [Socket.IO](https://socket.io/)               | v4.8.3   | WebSocket 库               |
-| **认证**      | [JWT](https://jwt.io/)                        | -        | JSON Web Token             |
-| **加密**      | [bcrypt](https://github.com/)                 | 5.1.1    | 密码哈希                   |
-| **API 文档**  | [Swagger](https://swagger.io/)                | 7.4.2    | API 自动生成               |
-| **容器化**    | [Docker](https://www.docker.com/)             | Latest   | 容器化部署                 |
-| **HTTP 客户** | [Axios](https://axios-http.com/)              | -        | 外部 API 调用              |
+| 组件          | 版本                                                 | 说明                       |
+| ------------- | ---------------------------------------------------- | -------------------------- |
+| **后端框架**  | [NestJS](https://nestjs.com/) v10.4.20               | 企业级 Node.js 框架        |
+| **编程语言**  | [TypeScript](https://www.typescriptlang.org/) v5.3.3 | 类型安全的 JavaScript 超集 |
+| **数据库**    | [MySQL](https://www.mysql.com/) v8.0                 | 关系型数据库               |
+| **缓存**      | [Redis](https://redis.io/) v7                        | 内存数据库和会话存储       |
+| **对象存储**  | [MinIO](https://min.io/) Latest                      | S3 兼容的对象存储          |
+| **实时通信**  | [Socket.IO](https://socket.io/) v4.8.3               | WebSocket 库               |
+| **认证**      | [JWT](https://jwt.io/)                               | JSON Web Token             |
+| **加密**      | [bcrypt](https://github.com/) 5.1.1                  | 密码哈希                   |
+| **API 文档**  | [Swagger](https://swagger.io/) 7.4.2                 | API 自动生成               |
+| **容器化**    | [Docker](https://www.docker.com/) Latest             | 容器化部署                 |
+| **HTTP 客户** | [Axios](https://axios-http.com/)                     | 外部 API 调用              |
 
 ## 功能特性
 
@@ -199,7 +199,7 @@ open http://localhost:3000/api
 ### 1. 环境要求
 
 - Node.js >= 18.0.0
-- PostgreSQL 16
+- MySQL 8.0
 - Redis 7
 - MinIO（对象存储）
 - Docker & Docker Compose
